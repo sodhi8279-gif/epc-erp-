@@ -57,6 +57,9 @@ Section "Install"
   WriteRegStr HKCU "${REGKEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
   WriteRegDWORD HKCU "${REGKEY}" "NoModify" 1
   WriteRegDWORD HKCU "${REGKEY}" "NoRepair" 1
+  ; In-app updates run this installer silently; reopen the app afterwards.
+  IfSilent 0 +2
+    Exec '"$INSTDIR\${EXENAME}"'
 SectionEnd
 
 Section "Uninstall"

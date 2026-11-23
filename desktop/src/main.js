@@ -4,6 +4,7 @@ const { app, BrowserWindow, Menu, ipcMain, shell, dialog, net } = require('elect
 const fs = require('node:fs');
 const path = require('node:path');
 const local = require('./local');
+const updater = require('./updater');
 
 const CONFIG = () => path.join(app.getPath('userData'), 'config.json');
 const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return {}; } };
@@ -140,6 +141,20 @@ async function backupLocal() {
   openApp();
 }
 
+let updating = false;
+async function checkUpdates(interactive) {
+  if (updating) return;
+  updating = true;
+  try {
+    await updater.check({
+      win, interactive,
+      showPage: (n, q) => page(n, q),
+      restore: () => openApp(),
+      beforeInstall: async () => { localUrl = ''; await local.stop(); },
+    });
+  } finally { updating = false; }
+}
+
 function buildMenu() {
   const template = [
     { label: 'File', submenu: [
@@ -164,6 +179,8 @@ function buildMenu() {
       ...(app.isPackaged ? [] : [{ role: 'toggleDevTools' }]),
     ] },
     { label: 'Help', submenu: [
+      { label: 'Check for updates…', click: () => checkUpdates(true) },
+      { type: 'separator' },
       { label: 'About', click: () => dialog.showMessageBox(win, { type: 'info', title: 'About', message: 'EPC Contracts & Billing', detail: `Desktop client ${app.getVersion()}\n${loadConfig().mode === 'local' ? 'Mode: this computer only\nData: ' + local.dataDir() : 'Server: ' + (serverUrl() || 'not set')}` }) },
     ] },
   ];
@@ -173,7 +190,7 @@ function buildMenu() {
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
-  app.whenReady().then(() => { buildMenu(); createWindow(); });
+  app.whenReady().then(() => { buildMenu(); createWindow(); if (app.isPackaged) setTimeout(() => checkUpdates(false), 15000); });
   app.on('window-all-closed', () => app.quit());
   let stopping = false;
   app.on('before-quit', (e) => {

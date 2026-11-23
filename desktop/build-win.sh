@@ -19,3 +19,11 @@ OUT="dist/EPC-Contracts-Setup-$VERSION.exe"
 "$MAKENSIS" -V2 -DVERSION="$VERSION" -DAPPDIR="$PWD/dist/win-unpacked" -DICON="$PWD/build/icon.ico" -DOUTFILE="$PWD/$OUT" build/installer.nsi
 echo "{ \"serverUrl\": \"\" }" > server.json
 (cd dist && sha256sum "$(basename "$OUT")" | tee "$(basename "$OUT").sha256")
+# Update manifest read by the app (Help → Check for updates). Publish it next to the installer.
+NOTES=${RELEASE_NOTES:-}
+node -e "
+const fs=require('fs');const [v,f,notes]=process.argv.slice(1);
+const sha=fs.readFileSync('dist/'+f+'.sha256','utf8').split(/\s+/)[0];
+fs.writeFileSync('dist/latest.json',JSON.stringify({version:v,url:'https://github.com/sodhi8279-gif/epc-erp-/raw/downloads/'+f,sha256:sha,size:fs.statSync('dist/'+f).size,notes},null,2));
+" "$VERSION" "$(basename "$OUT")" "$NOTES"
+cat dist/latest.json

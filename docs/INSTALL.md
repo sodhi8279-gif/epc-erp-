@@ -5,7 +5,7 @@ The system has two parts:
 | Part | Where it runs | What it holds |
 |---|---|---|
 | **Server** | One VPS (Ubuntu 22.04 or 24.04) | The database, uploaded documents, the application and the web interface |
-| **Desktop app** (`EPC-Contracts-Setup-0.2.1.exe`) | Each Windows PC at HQ and site offices | Nothing but the server address and the user's sign-in |
+| **Desktop app** (`EPC-Contracts-Setup-0.3.0.exe`) | Each Windows PC at HQ and site offices | Nothing but the server address and the user's sign-in |
 
 Every user, at HQ or on site, works on the same live data on the server. The desktop app is a dedicated window onto that server: it opens straight into the system, has its own Start-menu and desktop icon, and does not need a browser. People who prefer a browser, or are on a phone or Mac, can open the server's address directly; it is the same system.
 
@@ -114,13 +114,17 @@ systemctl start epc-erp
 
 ## 2. Desktop app (Windows)
 
-1. Copy `EPC-Contracts-Setup-0.2.1.exe` to the PC (shared drive, email or USB) and double-click it.
+1. Copy `EPC-Contracts-Setup-0.3.0.exe` to the PC (shared drive, email or USB) and double-click it.
 2. **Windows SmartScreen will warn** "Windows protected your PC" because the installer is not yet code-signed. Click **More info**, then **Run anyway**. (See "Code signing" below to remove this.)
 3. Follow the installer. It installs for the current user only, so no administrator rights are needed, and adds desktop and Start-menu shortcuts.
 4. On first launch, enter the server address (e.g. `erp.yourcompany.in`; for a server without HTTPS type `http://` followed by the IP). The app checks that the address is really your server before saving it.
 5. Sign in with the account your administrator created.
 
 The app remembers the server, the sign-in and the window size. **File → Change server…** changes the address. If the server cannot be reached, the app shows a clear message with **Try again**.
+
+**Updates install from inside the app.** It checks shortly after it opens, and on **Help → Check for updates…**. Choosing **Update now** downloads the new installer, checks its SHA-256, closes the local database cleanly, installs silently and reopens the app. Your data is not touched. Updates are read from `latest.json` on the repository's `downloads` branch, so the repository must stay public for this to work (or change the address in `desktop/src/updater.js`).
+
+Publishing an update: raise `version` in `desktop/package.json`, run `RELEASE_NOTES="…" ./build-win.sh`, then commit `dist/EPC-Contracts-Setup-<version>.exe` and `dist/latest.json` to the `downloads` branch.
 
 Requirements: Windows 10 or 11, 64-bit. Uninstall from **Settings → Apps** like any program.
 
@@ -132,7 +136,7 @@ So that staff never see the setup screen, build the installer with your address 
 cd desktop
 npm ci
 SERVER_URL=https://erp.yourcompany.in ./build-win.sh
-# → desktop/dist/EPC-Contracts-Setup-0.2.1.exe
+# → desktop/dist/EPC-Contracts-Setup-0.3.0.exe
 ```
 
 ### Code signing (recommended before rolling out widely)
@@ -140,7 +144,7 @@ SERVER_URL=https://erp.yourcompany.in ./build-win.sh
 Unsigned installers trigger SmartScreen and some antivirus products. To sign, buy a code-signing certificate (an OV or EV certificate from a CA such as Sectigo, DigiCert or an Indian reseller; EV removes the SmartScreen warning immediately), then sign the built file on Windows:
 
 ```powershell
-signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a "EPC-Contracts-Setup-0.2.1.exe"
+signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a "EPC-Contracts-Setup-0.3.0.exe"
 ```
 
 ### Other computers
