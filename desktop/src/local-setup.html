@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+<title>Set up your company</title><link rel="stylesheet" href="page.css"></head>
+<body>
+  <aside class="side">
+    <div class="brand">EPC Contracts &amp; Billing</div>
+    <div><div class="lead">Your data stays on this computer.</div><div class="chain"><div></div></div></div>
+    <div class="foot">Back up regularly from File → Back up data on this computer.</div>
+  </aside>
+  <main>
+    <h1>Set up your company</h1>
+    <p>You'll sign in with this email and password. Keep the password safe: there is no reset by email in this mode.</p>
+    <form id="f">
+      <div class="field"><label for="company">Company name</label><input id="company" required autofocus></div>
+      <div class="field"><label for="email">Administrator email</label><input id="email" type="email" required autocomplete="username"></div>
+      <div class="field"><label for="pw">Password (at least 8 characters)</label><input id="pw" type="password" minlength="8" required autocomplete="new-password"></div>
+      <div class="field"><label for="pw2">Repeat password</label><input id="pw2" type="password" required autocomplete="new-password"></div>
+      <label class="check"><input id="demo" type="checkbox" checked> <span>Add a sample project to explore (BOQ, subcontractors, work orders and materials, clearly marked DEMO). Sample users sign in with password Demo@12345.</span></label>
+      <button id="go" type="submit">Create and open</button>
+    </form>
+    <div class="error" id="err" role="alert"></div>
+  </main>
+  <script src="local-setup.js"></script>
+</body></html>

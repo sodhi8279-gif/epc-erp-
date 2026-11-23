@@ -5,11 +5,25 @@ The system has two parts:
 | Part | Where it runs | What it holds |
 |---|---|---|
 | **Server** | One VPS (Ubuntu 22.04 or 24.04) | The database, uploaded documents, the application and the web interface |
-| **Desktop app** (`EPC-Contracts-Setup-0.1.0.exe`) | Each Windows PC at HQ and site offices | Nothing but the server address and the user's sign-in |
+| **Desktop app** (`EPC-Contracts-Setup-0.2.0.exe`) | Each Windows PC at HQ and site offices | Nothing but the server address and the user's sign-in |
 
 Every user, at HQ or on site, works on the same live data on the server. The desktop app is a dedicated window onto that server: it opens straight into the system, has its own Start-menu and desktop icon, and does not need a browser. People who prefer a browser, or are on a phone or Mac, can open the server's address directly; it is the same system.
 
 A single shared server (rather than a database on each PC) is deliberate: measurements, approvals and material stock must be one record across sites, and approval limits and the audit trail only mean something if nobody can edit a local copy.
+
+---
+
+## 0. Try it on one computer first (no server)
+
+The desktop app can run entirely on one Windows PC: on its first screen choose **Use on this computer**. It then
+
+1. creates a private PostgreSQL database inside the app (about 10 to 60 seconds the first time; nothing else to install),
+2. asks for your company name and an administrator email and password, with an option to add a clearly marked DEMO project to explore,
+3. opens the system, running only on `127.0.0.1` so no other computer can reach it.
+
+Data is kept in `%LOCALAPPDATA%\EPCContracts\local` (database in `pgdata`, uploaded documents in `files`). Uninstalling the app does not delete it. **Back it up** with **File → Back up data on this computer…** (for example to a USB drive or OneDrive); **File → Open data folder** shows where it lives.
+
+This mode suits a trial or a single office. When HQ and sites need the same live data, set up the server below and switch with **File → Change server or mode…**. Moving existing data from this computer to the server is a manual database copy today; ask for help with it when you get there.
 
 ---
 
@@ -100,7 +114,7 @@ systemctl start epc-erp
 
 ## 2. Desktop app (Windows)
 
-1. Copy `EPC-Contracts-Setup-0.1.0.exe` to the PC (shared drive, email or USB) and double-click it.
+1. Copy `EPC-Contracts-Setup-0.2.0.exe` to the PC (shared drive, email or USB) and double-click it.
 2. **Windows SmartScreen will warn** "Windows protected your PC" because the installer is not yet code-signed. Click **More info**, then **Run anyway**. (See "Code signing" below to remove this.)
 3. Follow the installer. It installs for the current user only, so no administrator rights are needed, and adds desktop and Start-menu shortcuts.
 4. On first launch, enter the server address (e.g. `erp.yourcompany.in`; for a server without HTTPS type `http://` followed by the IP). The app checks that the address is really your server before saving it.
@@ -118,7 +132,7 @@ So that staff never see the setup screen, build the installer with your address 
 cd desktop
 npm ci
 SERVER_URL=https://erp.yourcompany.in ./build-win.sh
-# → desktop/dist/EPC-Contracts-Setup-0.1.0.exe
+# → desktop/dist/EPC-Contracts-Setup-0.2.0.exe
 ```
 
 ### Code signing (recommended before rolling out widely)
@@ -126,7 +140,7 @@ SERVER_URL=https://erp.yourcompany.in ./build-win.sh
 Unsigned installers trigger SmartScreen and some antivirus products. To sign, buy a code-signing certificate (an OV or EV certificate from a CA such as Sectigo, DigiCert or an Indian reseller; EV removes the SmartScreen warning immediately), then sign the built file on Windows:
 
 ```powershell
-signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a "EPC-Contracts-Setup-0.1.0.exe"
+signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a "EPC-Contracts-Setup-0.2.0.exe"
 ```
 
 ### Other computers
@@ -145,7 +159,11 @@ Verified in the build environment (Ubuntu 24.04 container):
 - The desktop app on Linux under a virtual display: first-run setup, rejection of a wrong or unreachable address, sign-in, relaunch straight into the system, the server-down screen, and that server pages cannot reach the desktop bridge.
 - The Windows installer was built and its contents, icon and version details checked.
 
+- The "this computer only" mode on Linux with the same code: private database created, company set up with demo data, sign-in, and relaunch straight into the system with the database stopped cleanly on exit.
+
 Not verified here (no systemd, public IP or Windows in the build environment):
+
+- The "this computer only" mode on Windows itself (the Windows database files and Microsoft runtime are included but could not be run here).
 
 - The systemd service, nginx, Let's Encrypt, the firewall and cron steps on a real VPS. They use standard Ubuntu commands, but do a trial install on a fresh VPS before going live.
 - Running the `.exe` on Windows itself.

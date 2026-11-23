@@ -19,3 +19,12 @@ button:disabled { opacity: .6; cursor: progress; }
 .error { margin-top: 16px; padding: 10px 12px; border-left: 3px solid #b42318; background: #fdecea; color: #7a1a12; font-size: 14px; display: none; }
 code { background: #eef1ee; padding: 1px 5px; border-radius: 4px; }
 @media (max-width: 860px) { body { grid-template-columns: 1fr; } .side { display: none; } }
+hr { border: 0; border-top: 1px solid #d9dfe3; margin: 28px 0; }
+.choice button { margin-top: 0; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; margin-top: 16px; }
+.check input { width: auto; margin-top: 4px; }
+.field { margin-bottom: 14px; }
+.spinner { width: 28px; height: 28px; border: 3px solid #d9dfe3; border-top-color: #0f6e6a; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 18px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+pre { white-space: pre-wrap; font-size: 12px; background: #eef1ee; padding: 10px; border-radius: 6px; max-height: 260px; overflow: auto; }

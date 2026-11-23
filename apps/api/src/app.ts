@@ -22,7 +22,7 @@ import measurementRoutes from './routes/measurements';
 import materialRoutes from './routes/materials';
 import reportRoutes from './routes/reports';
 
-export async function buildApp(opts: { logger?: boolean } = {}): Promise<FastifyInstance> {
+export async function buildApp(opts: { logger?: boolean; docs?: boolean } = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger: opts.logger ?? false, bodyLimit: 5 * 1024 * 1024, trustProxy: true }).withTypeProvider<ZodTypeProvider>();
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
@@ -42,7 +42,7 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
     },
     transform: jsonSchemaTransform,
   });
-  await app.register(swaggerUi, { routePrefix: '/api/docs' });
+  if (opts.docs !== false) await app.register(swaggerUi, { routePrefix: '/api/docs' });
 
   // Every /api route except login/docs requires a valid token whose user is still active.
   app.addHook('onRequest', async (req) => {

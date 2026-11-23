@@ -1,7 +1,7 @@
 {
   "name": "epc-desktop",
   "productName": "EPC Contracts & Billing",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Desktop client for EPC Contracts & Billing. Connects to your company's server.",
   "author": "EPC Contracts & Billing",
   "license": "UNLICENSED",
@@ -10,22 +10,56 @@
   "scripts": {
     "start": "electron .",
     "dist:win": "electron-builder --win nsis --x64",
-    "dist:linux": "electron-builder --linux AppImage --x64"
+    "dist:linux": "electron-builder --linux AppImage --x64",
+    "bundle:win": "build/bundle-local.sh win"
   },
   "devDependencies": {
     "electron": "33.4.11",
-    "electron-builder": "25.1.8"
+    "electron-builder": "25.1.8",
+    "esbuild": "^0.25.10"
   },
   "build": {
     "appId": "in.epc.contracts.desktop",
     "productName": "EPC Contracts & Billing",
     "executableName": "EPC Contracts",
     "artifactName": "EPC-Contracts-Setup-${version}.${ext}",
-    "directories": { "output": "dist", "buildResources": "build" },
-    "files": ["src/**/*", "package.json"],
-    "extraResources": [{ "from": "server.json", "to": "server.json", "filter": ["**/*"] }],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "server.json",
+        "to": "server.json"
+      },
+      {
+        "from": "local",
+        "to": "local",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "pgsql",
+        "to": "pgsql",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icon.png",
       "signAndEditExecutable": false
     },
@@ -40,6 +74,18 @@
       "uninstallDisplayName": "EPC Contracts & Billing",
       "deleteAppDataOnUninstall": false
     },
-    "linux": { "target": ["AppImage"], "icon": "build/icon.png", "category": "Office" }
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "build/icon.png",
+      "category": "Office"
+    },
+    "electronLanguages": [
+      "en-US"
+    ]
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
   }
 }

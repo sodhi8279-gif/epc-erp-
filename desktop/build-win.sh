@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 VERSION=$(node -p "require('./package.json').version")
 [[ -d node_modules ]] || npm ci
 echo "{ \"serverUrl\": \"${SERVER_URL:-}\" }" > server.json
+build/bundle-local.sh win
 rm -rf dist/win-unpacked
 npx electron-builder --win dir --x64            # app folder (no installer step, so no Wine)
 node build/set-exe-resources.cjs "dist/win-unpacked/EPC Contracts.exe" build/icon.ico "$VERSION"

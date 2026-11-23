@@ -2,7 +2,8 @@
 // Money: Decimal(18,2). Rates: Decimal(18,4). Quantities: Decimal(18,3). Factors: Decimal(18,6).
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
 }
 
 datasource db {

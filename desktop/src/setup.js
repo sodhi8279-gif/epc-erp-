@@ -6,3 +6,4 @@ $('f').addEventListener('submit', async (e) => {
   const r = await window.desktop.saveServer($('url').value);
   if (!r.ok) { $('err').textContent = r.error; $('err').style.display = 'block'; $('go').disabled = false; $('go').textContent = 'Connect'; }
 });
+$('local').addEventListener('click', () => { $('local').disabled = true; $('local').textContent = 'Starting…'; window.desktop.useLocal(); });

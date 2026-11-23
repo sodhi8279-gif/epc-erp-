@@ -3,6 +3,7 @@
 const { app, BrowserWindow, Menu, ipcMain, shell, dialog, net } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
+const local = require('./local');
 
 const CONFIG = () => path.join(app.getPath('userData'), 'config.json');
 const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return {}; } };
@@ -10,7 +11,10 @@ const loadConfig = () => readJson(CONFIG());
 const saveConfig = (c) => { fs.mkdirSync(path.dirname(CONFIG()), { recursive: true }); fs.writeFileSync(CONFIG(), JSON.stringify(c, null, 2)); };
 
 /** Server address: --server=… on the command line, then the user's saved choice, then the address baked in at build time. */
+let localUrl = '';
+/** Where the window points: the local server in this-computer mode, otherwise the company server. */
 function serverUrl() {
+  if (loadConfig().mode === 'local') return localUrl;
   const arg = process.argv.find((a) => a.startsWith('--server='));
   if (arg) return normalise(arg.slice(9));
   const saved = loadConfig().serverUrl;
@@ -59,10 +63,27 @@ function createWindow() {
   openApp();
 }
 
+const page = (name, query) => win.loadFile(path.join(__dirname, name), query ? { query } : undefined);
 function openApp() {
+  if (loadConfig().mode === 'local') return openLocal();
   const s = serverUrl();
-  if (!s) return win.loadFile(path.join(__dirname, 'setup.html'));
+  if (!s) return page('setup.html');
   win.loadURL(s + '/');
+}
+
+let localStarting = false;
+async function openLocal() {
+  if (localUrl) return win.loadURL(localUrl + '/');
+  if (localStarting) return;
+  localStarting = true;
+  page('starting.html', { first: local.isInitialised() ? '' : '1' });
+  try {
+    const r = await local.start();
+    if (r.needsSetup) page('local-setup.html');
+    else { localUrl = r.url; win.loadURL(localUrl + '/'); }
+  } catch (err) {
+    page('error.html', { error: String(err.message ?? err).slice(0, 3000) });
+  } finally { localStarting = false; }
 }
 
 async function checkServer(url) {
@@ -73,27 +94,51 @@ async function checkServer(url) {
 }
 
 // Only the app's own setup/offline screens (file://) may use these.
-const local = (e) => e.senderFrame?.url?.startsWith('file://');
-ipcMain.handle('desktop:current', (e) => !local(e) ? null : ({ serverUrl: serverUrl(), version: app.getVersion() }));
+const isLocalPage = (e) => e.senderFrame?.url?.startsWith('file://');
+ipcMain.handle('desktop:current', (e) => !isLocalPage(e) ? null : ({ serverUrl: loadConfig().serverUrl || '', mode: loadConfig().mode || 'server', version: app.getVersion() }));
 ipcMain.handle('desktop:save-server', async (e, input) => {
-  if (!local(e)) return { ok: false, error: 'Not allowed' };
+  if (!isLocalPage(e)) return { ok: false, error: 'Not allowed' };
   let url;
   try { url = normalise(input); } catch { return { ok: false, error: 'Enter a web address such as erp.yourcompany.in' }; }
   if (!url) return { ok: false, error: 'Enter the server address your administrator gave you.' };
   try { await checkServer(url); } catch (err) { const ssl = /SSL|CERT/i.test(String(err.message)) && url.startsWith('https:');
     return { ok: false, error: `Could not reach ${url}. ${err.message ?? err}` + (ssl ? ' If your server does not have HTTPS yet, type the address starting with http://' : '') }; }
-  saveConfig({ ...loadConfig(), serverUrl: url });
+  saveConfig({ ...loadConfig(), serverUrl: url, mode: 'server' });
+  if (localUrl) { localUrl = ''; await local.stop(); }
   openApp();
   return { ok: true };
 });
-ipcMain.handle('desktop:retry', (e) => local(e) && openApp());
-ipcMain.handle('desktop:change-server', (e) => local(e) && win.loadFile(path.join(__dirname, 'setup.html')));
+ipcMain.handle('desktop:retry', (e) => isLocalPage(e) && openApp());
+ipcMain.handle('desktop:use-local', (e) => { if (!isLocalPage(e)) return; saveConfig({ ...loadConfig(), mode: 'local' }); openApp(); });
+ipcMain.handle('desktop:local-setup', async (e, d) => {
+  if (!isLocalPage(e)) return { ok: false, error: 'Not allowed' };
+  const company = String(d?.company ?? '').trim(); const email = String(d?.email ?? '').trim().toLowerCase(); const password = String(d?.password ?? '');
+  if (!company) return { ok: false, error: 'Enter your company name.' };
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, error: 'Enter a valid email address for the administrator.' };
+  if (password.length < 8) return { ok: false, error: 'Use a password of at least 8 characters.' };
+  try { const r = await local.completeSetup({ company, email, password, demo: !!d.demo }); localUrl = r.url; win.loadURL(localUrl + '/'); return { ok: true }; }
+  catch (err) { return { ok: false, error: String(err.message ?? err).slice(0, 1500) }; }
+});
+ipcMain.handle('desktop:change-server', (e) => isLocalPage(e) && win.loadFile(path.join(__dirname, 'setup.html')));
+
+async function backupLocal() {
+  if (loadConfig().mode !== 'local') return dialog.showMessageBox(win, { type: 'info', message: 'Backups of a company server are made on the server.', detail: 'This option is for the "this computer only" mode.' });
+  const r = await dialog.showOpenDialog(win, { title: 'Choose a folder for the backup (e.g. a USB drive or OneDrive)', properties: ['openDirectory', 'createDirectory'] });
+  if (r.canceled || !r.filePaths[0]) return;
+  page('starting.html', { backup: '1' });
+  localUrl = '';
+  try { const dest = await local.backup(r.filePaths[0]); await dialog.showMessageBox(win, { type: 'info', message: 'Backup saved', detail: dest }); }
+  catch (err) { await dialog.showMessageBox(win, { type: 'error', message: 'Backup failed', detail: String(err.message ?? err) }); }
+  openApp();
+}
 
 function buildMenu() {
   const template = [
     { label: 'File', submenu: [
       { label: 'Home', accelerator: 'Alt+Home', click: () => openApp() },
-      { label: 'Change server…', click: () => win.loadFile(path.join(__dirname, 'setup.html')) },
+      { label: 'Change server or mode…', click: () => page('setup.html') },
+      { label: 'Back up data on this computer…', click: () => backupLocal() },
+      { label: 'Open data folder', click: () => shell.openPath(local.dataDir()) },
       { type: 'separator' },
       { label: 'Print…', accelerator: 'CmdOrCtrl+P', click: () => win.webContents.print() },
       { type: 'separator' },
@@ -107,7 +152,7 @@ function buildMenu() {
       ...(app.isPackaged ? [] : [{ role: 'toggleDevTools' }]),
     ] },
     { label: 'Help', submenu: [
-      { label: 'About', click: () => dialog.showMessageBox(win, { type: 'info', title: 'About', message: 'EPC Contracts & Billing', detail: `Desktop client ${app.getVersion()}\nServer: ${serverUrl() || 'not set'}` }) },
+      { label: 'About', click: () => dialog.showMessageBox(win, { type: 'info', title: 'About', message: 'EPC Contracts & Billing', detail: `Desktop client ${app.getVersion()}\n${loadConfig().mode === 'local' ? 'Mode: this computer only\nData: ' + local.dataDir() : 'Server: ' + (serverUrl() || 'not set')}` }) },
     ] },
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -118,4 +163,10 @@ else {
   app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
   app.whenReady().then(() => { buildMenu(); createWindow(); });
   app.on('window-all-closed', () => app.quit());
+  let stopping = false;
+  app.on('before-quit', (e) => {
+    if (stopping || !localUrl && !local.isInitialised()) return;
+    e.preventDefault(); stopping = true;
+    local.stop().finally(() => app.exit(0));
+  });
 }
