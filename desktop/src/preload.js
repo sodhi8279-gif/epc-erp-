@@ -5,6 +5,8 @@ if (location.protocol === 'file:') contextBridge.exposeInMainWorld('desktop', {
   saveServer: (url) => ipcRenderer.invoke('desktop:save-server', url),
   retry: () => ipcRenderer.invoke('desktop:retry'),
   changeServer: () => ipcRenderer.invoke('desktop:change-server'),
+  admins: () => ipcRenderer.invoke('desktop:admins'),
+  resetAdmin: (d) => ipcRenderer.invoke('desktop:reset-admin', d),
   useLocal: () => ipcRenderer.invoke('desktop:use-local'),
   localSetup: (d) => ipcRenderer.invoke('desktop:local-setup', d),
 });

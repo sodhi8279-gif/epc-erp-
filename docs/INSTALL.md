@@ -5,7 +5,7 @@ The system has two parts:
 | Part | Where it runs | What it holds |
 |---|---|---|
 | **Server** | One VPS (Ubuntu 22.04 or 24.04) | The database, uploaded documents, the application and the web interface |
-| **Desktop app** (`EPC-Contracts-Setup-0.2.0.exe`) | Each Windows PC at HQ and site offices | Nothing but the server address and the user's sign-in |
+| **Desktop app** (`EPC-Contracts-Setup-0.2.1.exe`) | Each Windows PC at HQ and site offices | Nothing but the server address and the user's sign-in |
 
 Every user, at HQ or on site, works on the same live data on the server. The desktop app is a dedicated window onto that server: it opens straight into the system, has its own Start-menu and desktop icon, and does not need a browser. People who prefer a browser, or are on a phone or Mac, can open the server's address directly; it is the same system.
 
@@ -21,7 +21,7 @@ The desktop app can run entirely on one Windows PC: on its first screen choose *
 2. asks for your company name and an administrator email and password, with an option to add a clearly marked DEMO project to explore,
 3. opens the system, running only on `127.0.0.1` so no other computer can reach it.
 
-Data is kept in `%LOCALAPPDATA%\EPCContracts\local` (database in `pgdata`, uploaded documents in `files`). Uninstalling the app does not delete it. **Back it up** with **File → Back up data on this computer…** (for example to a USB drive or OneDrive); **File → Open data folder** shows where it lives.
+Data is kept in `%LOCALAPPDATA%\EPCContracts\local` (database in `pgdata`, uploaded documents in `files`). Uninstalling the app does not delete it. **Back it up** with **File → Back up data on this computer…** (for example to a USB drive or OneDrive); **File → Open data folder** shows where it lives. Forgot the administrator password? Use **File → Reset administrator password…** (only in this mode, only from the app on this PC; the reset is recorded in the audit log).
 
 This mode suits a trial or a single office. When HQ and sites need the same live data, set up the server below and switch with **File → Change server or mode…**. Moving existing data from this computer to the server is a manual database copy today; ask for help with it when you get there.
 
@@ -114,7 +114,7 @@ systemctl start epc-erp
 
 ## 2. Desktop app (Windows)
 
-1. Copy `EPC-Contracts-Setup-0.2.0.exe` to the PC (shared drive, email or USB) and double-click it.
+1. Copy `EPC-Contracts-Setup-0.2.1.exe` to the PC (shared drive, email or USB) and double-click it.
 2. **Windows SmartScreen will warn** "Windows protected your PC" because the installer is not yet code-signed. Click **More info**, then **Run anyway**. (See "Code signing" below to remove this.)
 3. Follow the installer. It installs for the current user only, so no administrator rights are needed, and adds desktop and Start-menu shortcuts.
 4. On first launch, enter the server address (e.g. `erp.yourcompany.in`; for a server without HTTPS type `http://` followed by the IP). The app checks that the address is really your server before saving it.
@@ -132,7 +132,7 @@ So that staff never see the setup screen, build the installer with your address 
 cd desktop
 npm ci
 SERVER_URL=https://erp.yourcompany.in ./build-win.sh
-# → desktop/dist/EPC-Contracts-Setup-0.2.0.exe
+# → desktop/dist/EPC-Contracts-Setup-0.2.1.exe
 ```
 
 ### Code signing (recommended before rolling out widely)
@@ -140,7 +140,7 @@ SERVER_URL=https://erp.yourcompany.in ./build-win.sh
 Unsigned installers trigger SmartScreen and some antivirus products. To sign, buy a code-signing certificate (an OV or EV certificate from a CA such as Sectigo, DigiCert or an Indian reseller; EV removes the SmartScreen warning immediately), then sign the built file on Windows:
 
 ```powershell
-signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a "EPC-Contracts-Setup-0.2.0.exe"
+signtool sign /fd sha256 /tr http://timestamp.digicert.com /td sha256 /a "EPC-Contracts-Setup-0.2.1.exe"
 ```
 
 ### Other computers

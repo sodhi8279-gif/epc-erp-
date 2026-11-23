@@ -109,6 +109,14 @@ ipcMain.handle('desktop:save-server', async (e, input) => {
   return { ok: true };
 });
 ipcMain.handle('desktop:retry', (e) => isLocalPage(e) && openApp());
+ipcMain.handle('desktop:admins', async (e) => (isLocalPage(e) && local.isRunning() ? local.listAdmins() : []));
+ipcMain.handle('desktop:reset-admin', async (e, d) => {
+  if (!isLocalPage(e) || loadConfig().mode !== 'local' || !local.isRunning()) return { ok: false, error: 'Not available' };
+  const password = String(d?.password ?? '');
+  if (password.length < 8) return { ok: false, error: 'Use a password of at least 8 characters.' };
+  try { await local.resetAdminPassword(String(d?.email ?? ''), password); return { ok: true }; }
+  catch (err) { return { ok: false, error: String(err.message ?? err) }; }
+});
 ipcMain.handle('desktop:use-local', (e) => { if (!isLocalPage(e)) return; saveConfig({ ...loadConfig(), mode: 'local' }); openApp(); });
 ipcMain.handle('desktop:local-setup', async (e, d) => {
   if (!isLocalPage(e)) return { ok: false, error: 'Not allowed' };
@@ -138,6 +146,10 @@ function buildMenu() {
       { label: 'Home', accelerator: 'Alt+Home', click: () => openApp() },
       { label: 'Change server or mode…', click: () => page('setup.html') },
       { label: 'Back up data on this computer…', click: () => backupLocal() },
+      { label: 'Reset administrator password…', click: () => {
+        if (loadConfig().mode !== 'local' || !local.isRunning()) return dialog.showMessageBox(win, { type: 'info', message: 'Available in "this computer only" mode', detail: 'On a company server, ask your administrator to reset your password under Users & roles.' });
+        page('reset.html');
+      } },
       { label: 'Open data folder', click: () => shell.openPath(local.dataDir()) },
       { type: 'separator' },
       { label: 'Print…', accelerator: 'CmdOrCtrl+P', click: () => win.webContents.print() },

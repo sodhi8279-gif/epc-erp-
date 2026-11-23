@@ -1,7 +1,7 @@
 {
   "name": "epc-desktop",
   "productName": "EPC Contracts & Billing",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Desktop client for EPC Contracts & Billing. Connects to your company's server.",
   "author": "EPC Contracts & Billing",
   "license": "UNLICENSED",
@@ -86,6 +86,7 @@
     ]
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "pg": "^8.16.3"
   }
 }

@@ -53,6 +53,9 @@ async function initialise() {
 
 let pgPort;
 async function startPostgres(state) {
+  // A database left running by a crashed or force-closed session: stop it cleanly first, then start fresh.
+  const running = await run(PG_BIN('pg_ctl'), ['status', '-D', pgData()]).then(() => true, () => false);
+  if (running) await run(PG_BIN('pg_ctl'), ['stop', '-D', pgData(), '-m', 'fast', '-w', '-t', '60']);
   pgPort = await freePort(state.pgPort);
   if (pgPort !== state.pgPort) writeState({ ...state, pgPort });
   await run(PG_BIN('pg_ctl'), ['start', '-D', pgData(), '-w', '-t', '60', '-l', logFile(), '-o', `-p ${pgPort}`]).catch((e) => {
@@ -159,4 +162,25 @@ async function backup(destRoot) {
   return dest;
 }
 
-module.exports = { start, completeSetup, stop, backup, dataDir, isInitialised };
+const isRunning = () => !!pgPort && fs.existsSync(path.join(pgData(), 'postmaster.pid'));
+/** Administrators on this computer (for the password-reset screen). */
+async function listAdmins() {
+  const c = new Client({ connectionString: dbUrl(readState()) }); await c.connect();
+  try { return (await c.query('SELECT email, name FROM "User" WHERE "isSuperAdmin" AND active ORDER BY email')).rows; } finally { await c.end(); }
+}
+/** Sets a new password for an administrator. Only possible from the desktop app itself, i.e. by someone at this PC. */
+async function resetAdminPassword(email, password) {
+  const bcrypt = require('bcryptjs');
+  const hash = await bcrypt.hash(password, 10);
+  const c = new Client({ connectionString: dbUrl(readState()) }); await c.connect();
+  try {
+    await c.query('BEGIN');
+    const r = await c.query('UPDATE "User" SET "passwordHash" = $1 WHERE email = $2 AND "isSuperAdmin" AND active RETURNING id, name', [hash, email]);
+    if (!r.rowCount) throw new Error('No active administrator has that email.');
+    await c.query('INSERT INTO "AuditLog" (id, "userId", "userName", "entityType", "entityId", action, reason) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [crypto.randomUUID(), r.rows[0].id, r.rows[0].name, 'User', r.rows[0].id, 'PASSWORD_RESET', 'Reset from the desktop app on this computer']);
+    await c.query('COMMIT');
+  } catch (e) { await c.query('ROLLBACK').catch(() => undefined); throw e; } finally { await c.end(); }
+}
+
+module.exports = { listAdmins, resetAdminPassword, isRunning, start, completeSetup, stop, backup, dataDir, isInitialised };

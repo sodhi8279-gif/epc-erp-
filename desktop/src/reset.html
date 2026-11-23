@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+<title>Reset administrator password</title><link rel="stylesheet" href="page.css"></head>
+<body>
+  <aside class="side"><div class="brand">EPC Contracts &amp; Billing</div><div></div><div class="foot">The reset is recorded in the audit log.</div></aside>
+  <main>
+    <h1>Reset administrator password</h1>
+    <p>Sign in with this email after the reset.</p>
+    <form id="f">
+      <div class="field"><label for="email">Administrator</label><select id="email"></select></div>
+      <div class="field"><label for="pw">New password (at least 8 characters)</label><input id="pw" type="password" minlength="8" required autocomplete="new-password" autofocus></div>
+      <div class="field"><label for="pw2">Repeat new password</label><input id="pw2" type="password" required autocomplete="new-password"></div>
+      <button id="go" type="submit">Set password and sign in</button><button class="secondary" id="cancel" type="button">Cancel</button>
+    </form>
+    <div class="error" id="err" role="alert"></div>
+  </main>
+  <script src="reset.js"></script>
+</body></html>
