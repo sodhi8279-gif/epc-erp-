@@ -116,6 +116,8 @@ const routes: FastifyPluginAsyncZod = async (app) => {
     const { wo, scope } = await woCtx(req.params.id);
     await requirePermission(req.user, 'workorder.edit', scope);
     if (wo.status !== 'APPROVED') throw conflict('Amendments apply to approved work orders');
+    // A rate dated before the work order's own start would be shadowed by the original rate in rate history.
+    if (wo.startDate && req.body.effectiveFrom < wo.startDate) throw bad('Effective date cannot be before the work order start date');
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const rateChange = req.body.changes.some((c) => c.newRate !== undefined);
     if (rateChange && req.body.effectiveFrom < today && !req.body.retrospectiveAuthority) throw bad('A retrospective rate change must cite the authorising revision / approval');

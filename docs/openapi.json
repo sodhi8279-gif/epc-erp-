@@ -1,0 +1,7027 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "EPC Contract, BOQ, Subcontractor Billing & Material Reconciliation API",
+    "version": "0.1.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "current": {
+                    "type": "string"
+                  },
+                  "next": {
+                    "type": "string",
+                    "minLength": 10
+                  }
+                },
+                "required": [
+                  "current",
+                  "next"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/meta/permissions": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/companies": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "org"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "gstin": {
+                    "type": "string"
+                  },
+                  "pan": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "org"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 30
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "WTP",
+                      "STP",
+                      "WATER_SUPPLY",
+                      "PIPELINE",
+                      "PUMPING_STATION",
+                      "SEWERAGE",
+                      "CIVIL",
+                      "RCC_BUILDING",
+                      "MECH_ELEC",
+                      "INDUSTRIAL_EPC",
+                      "HYDRO_MECHANICAL",
+                      "OTHER"
+                    ]
+                  },
+                  "client": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "PLANNING",
+                      "ACTIVE",
+                      "ON_HOLD",
+                      "COMPLETED",
+                      "CLOSED"
+                    ]
+                  }
+                },
+                "required": [
+                  "companyId",
+                  "code",
+                  "name",
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{id}": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "org"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 30
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "WTP",
+                      "STP",
+                      "WATER_SUPPLY",
+                      "PIPELINE",
+                      "PUMPING_STATION",
+                      "SEWERAGE",
+                      "CIVIL",
+                      "RCC_BUILDING",
+                      "MECH_ELEC",
+                      "INDUSTRIAL_EPC",
+                      "HYDRO_MECHANICAL",
+                      "OTHER"
+                    ]
+                  },
+                  "client": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "PLANNING",
+                      "ACTIVE",
+                      "ON_HOLD",
+                      "COMPLETED",
+                      "CLOSED"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/companies/{id}/roles": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "org"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 40
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "department": {
+                    "type": "string",
+                    "enum": [
+                      "MANAGEMENT",
+                      "COMMERCIAL",
+                      "ACCOUNTS",
+                      "BILLING",
+                      "PROCUREMENT",
+                      "TECHNICAL",
+                      "AUDIT",
+                      "PROJECT",
+                      "STORES",
+                      "EXTERNAL"
+                    ]
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "admin.users",
+                        "admin.roles",
+                        "audit.view",
+                        "org.manage",
+                        "project.view",
+                        "contract.manage",
+                        "document.upload",
+                        "boq.edit",
+                        "boq.approve",
+                        "activity.edit",
+                        "activity.approve",
+                        "subcontractor.manage",
+                        "subcontractor.approve",
+                        "workorder.edit",
+                        "workorder.approve",
+                        "allocation.edit",
+                        "allocation.override",
+                        "measurement.create",
+                        "measurement.verify",
+                        "measurement.scrutinize",
+                        "measurement.approve",
+                        "measurement.review",
+                        "measurement.certify",
+                        "measurement.reverse",
+                        "material.master",
+                        "material.receive",
+                        "material.requisition",
+                        "material.approve",
+                        "material.issue",
+                        "material.norms",
+                        "reconciliation.prepare",
+                        "reconciliation.approve",
+                        "report.view"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "code",
+                  "name",
+                  "department",
+                  "permissions"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/roles/{id}": {
+      "put": {
+        "tags": [
+          "org"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "department": {
+                    "type": "string",
+                    "enum": [
+                      "MANAGEMENT",
+                      "COMMERCIAL",
+                      "ACCOUNTS",
+                      "BILLING",
+                      "PROCUREMENT",
+                      "TECHNICAL",
+                      "AUDIT",
+                      "PROJECT",
+                      "STORES",
+                      "EXTERNAL"
+                    ]
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "admin.users",
+                        "admin.roles",
+                        "audit.view",
+                        "org.manage",
+                        "project.view",
+                        "contract.manage",
+                        "document.upload",
+                        "boq.edit",
+                        "boq.approve",
+                        "activity.edit",
+                        "activity.approve",
+                        "subcontractor.manage",
+                        "subcontractor.approve",
+                        "workorder.edit",
+                        "workorder.approve",
+                        "allocation.edit",
+                        "allocation.override",
+                        "measurement.create",
+                        "measurement.verify",
+                        "measurement.scrutinize",
+                        "measurement.approve",
+                        "measurement.review",
+                        "measurement.certify",
+                        "measurement.reverse",
+                        "material.master",
+                        "material.receive",
+                        "material.requisition",
+                        "material.approve",
+                        "material.issue",
+                        "material.norms",
+                        "reconciliation.prepare",
+                        "reconciliation.approve",
+                        "report.view"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "department",
+                  "permissions"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/companies/{id}/users": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "org"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 10
+                  },
+                  "roleId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "projectId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "financialLimit": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "password",
+                  "roleId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/assignments": {
+      "post": {
+        "tags": [
+          "org"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "roleId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "projectId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "financialLimit": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "companyId",
+                  "roleId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/assignments/{id}": {
+      "delete": {
+        "tags": [
+          "org"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "patch": {
+        "tags": [
+          "org"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "companyId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/audit": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "companyId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "projectId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "entityType",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "entityId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "maximum": 500,
+              "default": 100
+            },
+            "in": "query",
+            "name": "take",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/workflow/{entityType}/{entityId}": {
+      "get": {
+        "tags": [
+          "org"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "entityType",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "entityId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/documents": {
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "companyId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "projectId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "entityType",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "entityId",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/documents/{id}/download": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/contracts": {
+      "get": {
+        "tags": [
+          "boq"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contractNo": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "client": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "ITEM_RATE",
+                      "PERCENTAGE_RATE",
+                      "LUMP_SUM",
+                      "EPC",
+                      "DESIGN_BUILD"
+                    ],
+                    "default": "ITEM_RATE"
+                  },
+                  "contractValue": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "agreementDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "loaRef": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "completionDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rebatePercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "contractNo",
+                  "title",
+                  "client",
+                  "contractValue"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/contracts/{id}": {
+      "get": {
+        "tags": [
+          "boq"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contractNo": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "client": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "ITEM_RATE",
+                      "PERCENTAGE_RATE",
+                      "LUMP_SUM",
+                      "EPC",
+                      "DESIGN_BUILD"
+                    ],
+                    "default": "ITEM_RATE"
+                  },
+                  "contractValue": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "agreementDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "loaRef": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "completionDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rebatePercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/contracts/{id}/revisions": {
+      "post": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "ORIGINAL",
+                      "REVISED",
+                      "VARIATION"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "authorityRef": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  },
+                  "sourceDocumentId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "type",
+                  "title"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/revisions/{id}": {
+      "get": {
+        "tags": [
+          "boq"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "boq"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/revisions/{id}/compare": {
+      "get": {
+        "tags": [
+          "boq"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/revisions/{id}/validate": {
+      "get": {
+        "tags": [
+          "boq"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/revisions/{id}/submit": {
+      "post": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "effectiveDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "acknowledgeWarnings": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/revisions/{id}/approve": {
+      "post": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "effectiveDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "acknowledgeWarnings": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/revisions/{id}/reject": {
+      "post": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "effectiveDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "acknowledgeWarnings": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/revisions/{id}/sections": {
+      "post": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sortOrder": {
+                    "type": "integer",
+                    "default": 0
+                  }
+                },
+                "required": [
+                  "code",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/revisions/{id}/items": {
+      "post": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "itemNo": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "unit": {
+                    "type": "string",
+                    "enum": [
+                      "CUM",
+                      "SQM",
+                      "RM",
+                      "M",
+                      "KM",
+                      "NO",
+                      "JOINT",
+                      "KG",
+                      "QTL",
+                      "MT",
+                      "BAG",
+                      "LTR",
+                      "HOUR",
+                      "DAY",
+                      "MONTH",
+                      "LS",
+                      "JOB",
+                      "SET"
+                    ]
+                  },
+                  "quantity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "rate": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "sectionId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "isHeader": {
+                    "type": "boolean"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "ORIGINAL",
+                      "EXTRA",
+                      "SUBSTITUTED",
+                      "DEVIATED"
+                    ]
+                  },
+                  "substitutesKey": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "specRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "drawingRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "contractRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "sortOrder": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "itemNo",
+                  "description",
+                  "unit",
+                  "quantity",
+                  "rate"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/boq-items/{id}": {
+      "patch": {
+        "tags": [
+          "boq"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "itemNo": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "unit": {
+                    "type": "string",
+                    "enum": [
+                      "CUM",
+                      "SQM",
+                      "RM",
+                      "M",
+                      "KM",
+                      "NO",
+                      "JOINT",
+                      "KG",
+                      "QTL",
+                      "MT",
+                      "BAG",
+                      "LTR",
+                      "HOUR",
+                      "DAY",
+                      "MONTH",
+                      "LS",
+                      "JOB",
+                      "SET"
+                    ]
+                  },
+                  "quantity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "rate": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "sectionId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "isHeader": {
+                    "type": "boolean"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "ORIGINAL",
+                      "EXTRA",
+                      "SUBSTITUTED",
+                      "DEVIATED"
+                    ]
+                  },
+                  "substitutesKey": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "specRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "drawingRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "contractRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "sortOrder": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "boq"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/contracts/{id}/imports": {
+      "post": {
+        "tags": [
+          "boq-import"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/imports/{id}": {
+      "get": {
+        "tags": [
+          "boq-import"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            },
+            "in": "query",
+            "name": "sheets",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/imports/{id}/map": {
+      "post": {
+        "tags": [
+          "boq-import"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sheetName": {
+                    "type": "string"
+                  },
+                  "headerRow": {
+                    "type": "integer",
+                    "exclusiveMinimum": true,
+                    "minimum": 0
+                  },
+                  "mapping": {
+                    "type": "object",
+                    "properties": {
+                      "itemNo": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "description": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "unit": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "rate": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "amount": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "specRef": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "drawingRef": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "sheetName",
+                  "headerRow",
+                  "mapping"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/imports/{id}/rows": {
+      "put": {
+        "tags": [
+          "boq-import"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rowNo": {
+                          "type": "number"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "ITEM",
+                            "HEADER",
+                            "SKIP"
+                          ]
+                        },
+                        "itemNo": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "unitRaw": {
+                          "type": "string"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "quantity": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "rate": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "amount": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "specRef": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "drawingRef": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "issues": {
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "rowNo",
+                        "kind",
+                        "itemNo",
+                        "description",
+                        "unitRaw",
+                        "unit",
+                        "quantity",
+                        "rate",
+                        "amount"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "rows"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/imports/{id}/confirm": {
+      "post": {
+        "tags": [
+          "boq-import"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "acknowledgeWarnings": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/contracts/{id}/boq-status": {
+      "get": {
+        "tags": [
+          "boq"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/contracts/{id}/items/{itemKey}/breakup": {
+      "get": {
+        "tags": [
+          "activities"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "itemKey",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "activities"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "activities": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "code": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 2
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "PERCENT",
+                            "FIXED_RATE"
+                          ]
+                        },
+                        "percentage": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "fixedRate": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "unit": {
+                          "type": "string",
+                          "enum": [
+                            "CUM",
+                            "SQM",
+                            "RM",
+                            "M",
+                            "KM",
+                            "NO",
+                            "JOINT",
+                            "KG",
+                            "QTL",
+                            "MT",
+                            "BAG",
+                            "LTR",
+                            "HOUR",
+                            "DAY",
+                            "MONTH",
+                            "LS",
+                            "JOB",
+                            "SET"
+                          ]
+                        },
+                        "conversionFactor": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "conversionBasis": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "name",
+                        "method",
+                        "unit",
+                        "conversionFactor"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "activities"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "itemKey",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/contracts/{id}/items/{itemKey}/breakup/approve": {
+      "post": {
+        "tags": [
+          "activities"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "itemKey",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/contracts/{id}/activities": {
+      "get": {
+        "tags": [
+          "activities"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/companies/{id}/subcontractors": {
+      "get": {
+        "tags": [
+          "subcontractors"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "q",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "subcontractors"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "firmName": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "constitution": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "address": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "state": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "gstin": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "pan": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "contactPerson": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "phone": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "email": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "not": {}
+                          },
+                          {
+                            "type": "string",
+                            "format": "email"
+                          }
+                        ],
+                        "nullable": true
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          ""
+                        ]
+                      }
+                    ]
+                  },
+                  "bankName": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "bankAccount": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "not": {}
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^\\d{9,18}$"
+                          }
+                        ],
+                        "nullable": true
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          ""
+                        ]
+                      }
+                    ]
+                  },
+                  "ifsc": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "workCategories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "default": []
+                  },
+                  "gstRegistered": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "gstRate": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "tdsSection": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "tdsRate": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "retentionPercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "paymentTermsDays": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 365
+                  }
+                },
+                "required": [
+                  "code",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/subcontractors/{id}": {
+      "get": {
+        "tags": [
+          "subcontractors"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "subcontractors"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/subcontractors/{id}/status": {
+      "post": {
+        "tags": [
+          "subcontractors"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "ACTIVE",
+                      "SUSPENDED",
+                      "BLACKLISTED",
+                      "INACTIVE"
+                    ]
+                  },
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/subcontractors/{id}/compliance": {
+      "post": {
+        "tags": [
+          "subcontractors"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "docType": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "docNo": {
+                    "type": "string"
+                  },
+                  "validFrom": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "validTo": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "documentId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "docType"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/compliance/{id}/verify": {
+      "post": {
+        "tags": [
+          "subcontractors"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/work-orders": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "subcontractorId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subcontractorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "completionDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "materialResponsibility": {
+                    "type": "string",
+                    "enum": [
+                      "COMPANY_RECOVERABLE",
+                      "COMPANY_FREE_ISSUE",
+                      "SUBCONTRACTOR",
+                      "MIXED"
+                    ],
+                    "default": "COMPANY_RECOVERABLE"
+                  },
+                  "retentionPercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "securityDepositPercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "advanceAmount": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "advanceRecoveryPercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "paymentTerms": {
+                    "type": "string"
+                  },
+                  "recoveryConditions": {
+                    "type": "string"
+                  },
+                  "otherDeductions": {
+                    "type": "string"
+                  },
+                  "woNo": {
+                    "type": "string"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "activityId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "rate": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "activityId",
+                        "quantity",
+                        "rate"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "subcontractorId",
+                  "title",
+                  "items"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/work-orders/{id}": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "work-orders"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "completionDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "materialResponsibility": {
+                    "type": "string",
+                    "enum": [
+                      "COMPANY_RECOVERABLE",
+                      "COMPANY_FREE_ISSUE",
+                      "SUBCONTRACTOR",
+                      "MIXED"
+                    ],
+                    "default": "COMPANY_RECOVERABLE"
+                  },
+                  "retentionPercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "securityDepositPercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "advanceAmount": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "advanceRecoveryPercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "paymentTerms": {
+                    "type": "string"
+                  },
+                  "recoveryConditions": {
+                    "type": "string"
+                  },
+                  "otherDeductions": {
+                    "type": "string"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "activityId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "rate": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "activityId",
+                        "quantity",
+                        "rate"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "title",
+                  "items"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/work-orders/{id}/{action}": {
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "submit",
+                "approve",
+                "reject",
+                "suspend",
+                "close"
+              ]
+            },
+            "in": "path",
+            "name": "action",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/work-orders/{id}/amendments": {
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 5
+                  },
+                  "effectiveFrom": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "retrospectiveAuthority": {
+                    "type": "string"
+                  },
+                  "changes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "workOrderItemId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "activityId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "newRate": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "newQuantity": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "reason",
+                  "effectiveFrom",
+                  "changes"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/amendments/{id}/{action}": {
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "approve",
+                "reject"
+              ]
+            },
+            "in": "path",
+            "name": "action",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/allocations/check": {
+      "post": {
+        "tags": [
+          "allocation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "activityId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "workOrderItemId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "quantity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "zone": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "chainageFrom": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "chainageTo": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "remarks": {
+                    "type": "string"
+                  },
+                  "exceptionReason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "activityId",
+                  "workOrderItemId",
+                  "quantity"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/allocations": {
+      "post": {
+        "tags": [
+          "allocation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "activityId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "workOrderItemId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "quantity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "zone": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "chainageFrom": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "chainageTo": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "remarks": {
+                    "type": "string"
+                  },
+                  "exceptionReason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "activityId",
+                  "workOrderItemId",
+                  "quantity"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "allocation"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "activityId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "subcontractorId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/allocations/{id}/{action}": {
+      "post": {
+        "tags": [
+          "allocation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "approve-exception",
+                "reject-exception",
+                "cancel"
+              ]
+            },
+            "in": "path",
+            "name": "action",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/allocation-matrix": {
+      "get": {
+        "tags": [
+          "allocation"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "contractId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/progress": {
+      "post": {
+        "tags": [
+          "allocation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "allocationId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "quantity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "chainageFrom": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "chainageTo": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "manpower": {
+                    "type": "integer"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "allocationId",
+                  "date",
+                  "quantity"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "allocation"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "to",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/measurements": {
+      "get": {
+        "tags": [
+          "measurements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "workOrderId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "activityId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "subcontractorId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "to",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "measurements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "workOrderItemId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "allocationId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "GENERIC",
+                      "PIPELINE",
+                      "EXCAVATION",
+                      "RCC",
+                      "REBAR"
+                    ]
+                  },
+                  "mbNo": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "mbPage": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "location": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "structure": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "drawingRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "zone": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "chainageFrom": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "chainageTo": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "attributes": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "nullable": true
+                  },
+                  "measurementRule": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "remarks": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "description": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "nos": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "length": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "breadth": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "depth": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "chainageFrom": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "chainageTo": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "barDia": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "cuttingLength": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "unitWeight": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "directQty": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "isDeduction": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "workOrderItemId",
+                  "date",
+                  "type",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/measurements/{id}": {
+      "get": {
+        "tags": [
+          "measurements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "measurements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "workOrderItemId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "allocationId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "GENERIC",
+                      "PIPELINE",
+                      "EXCAVATION",
+                      "RCC",
+                      "REBAR"
+                    ]
+                  },
+                  "mbNo": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "mbPage": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "location": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "structure": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "drawingRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "zone": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "chainageFrom": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "chainageTo": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "attributes": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "nullable": true
+                  },
+                  "measurementRule": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "remarks": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "description": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "nos": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "length": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "breadth": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "depth": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "chainageFrom": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "chainageTo": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "barDia": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "cuttingLength": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "unitWeight": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "directQty": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "isDeduction": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "workOrderItemId",
+                  "date",
+                  "type",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "measurements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/measurements/preview": {
+      "post": {
+        "tags": [
+          "measurements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "workOrderItemId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "allocationId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "GENERIC",
+                      "PIPELINE",
+                      "EXCAVATION",
+                      "RCC",
+                      "REBAR"
+                    ]
+                  },
+                  "mbNo": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "mbPage": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "location": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "structure": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "drawingRef": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "zone": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "chainageFrom": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "chainageTo": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "attributes": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "nullable": true
+                  },
+                  "measurementRule": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "remarks": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "description": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "nos": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "length": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "breadth": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "depth": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "chainageFrom": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "chainageTo": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "barDia": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "cuttingLength": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "unitWeight": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "directQty": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "isDeduction": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  },
+                  "excludeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "workOrderItemId",
+                  "date",
+                  "type",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/measurements/{id}/transition": {
+      "post": {
+        "tags": [
+          "measurements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "submit",
+                      "verify",
+                      "scrutinize",
+                      "approve",
+                      "review",
+                      "certify",
+                      "return"
+                    ]
+                  },
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "action"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/measurements/{id}/reverse": {
+      "post": {
+        "tags": [
+          "measurements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 5
+                  }
+                },
+                "required": [
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/companies/{id}/materials": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 30
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "CEMENT",
+                      "STEEL",
+                      "STRUCTURAL_STEEL",
+                      "PIPE",
+                      "FITTING",
+                      "VALVE",
+                      "ELECTRODE",
+                      "FASTENER",
+                      "AGGREGATE",
+                      "SAND",
+                      "ADMIXTURE",
+                      "CONSUMABLE",
+                      "TOOL",
+                      "OTHER"
+                    ]
+                  },
+                  "unit": {
+                    "type": "string",
+                    "enum": [
+                      "CUM",
+                      "SQM",
+                      "RM",
+                      "M",
+                      "KM",
+                      "NO",
+                      "JOINT",
+                      "KG",
+                      "QTL",
+                      "MT",
+                      "BAG",
+                      "LTR",
+                      "HOUR",
+                      "DAY",
+                      "MONTH",
+                      "LS",
+                      "JOB",
+                      "SET"
+                    ]
+                  },
+                  "altUnit": {
+                    "type": "string",
+                    "enum": [
+                      "CUM",
+                      "SQM",
+                      "RM",
+                      "M",
+                      "KM",
+                      "NO",
+                      "JOINT",
+                      "KG",
+                      "QTL",
+                      "MT",
+                      "BAG",
+                      "LTR",
+                      "HOUR",
+                      "DAY",
+                      "MONTH",
+                      "LS",
+                      "JOB",
+                      "SET"
+                    ],
+                    "nullable": true
+                  },
+                  "altFactor": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "defaultBasis": {
+                    "type": "string",
+                    "enum": [
+                      "RECOVERABLE",
+                      "FREE_ISSUE",
+                      "SUBCONTRACTOR_SUPPLIED",
+                      "RETURNABLE",
+                      "CONSUMABLE",
+                      "SCRAP"
+                    ],
+                    "default": "RECOVERABLE"
+                  },
+                  "standardRate": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "default": "0"
+                  },
+                  "batchTracked": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "name",
+                  "category",
+                  "unit"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/materials/{id}": {
+      "patch": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "CEMENT",
+                      "STEEL",
+                      "STRUCTURAL_STEEL",
+                      "PIPE",
+                      "FITTING",
+                      "VALVE",
+                      "ELECTRODE",
+                      "FASTENER",
+                      "AGGREGATE",
+                      "SAND",
+                      "ADMIXTURE",
+                      "CONSUMABLE",
+                      "TOOL",
+                      "OTHER"
+                    ]
+                  },
+                  "altUnit": {
+                    "type": "string",
+                    "enum": [
+                      "CUM",
+                      "SQM",
+                      "RM",
+                      "M",
+                      "KM",
+                      "NO",
+                      "JOINT",
+                      "KG",
+                      "QTL",
+                      "MT",
+                      "BAG",
+                      "LTR",
+                      "HOUR",
+                      "DAY",
+                      "MONTH",
+                      "LS",
+                      "JOB",
+                      "SET"
+                    ],
+                    "nullable": true
+                  },
+                  "altFactor": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "enum": [
+                          "null"
+                        ],
+                        "nullable": true
+                      }
+                    ]
+                  },
+                  "defaultBasis": {
+                    "type": "string",
+                    "enum": [
+                      "RECOVERABLE",
+                      "FREE_ISSUE",
+                      "SUBCONTRACTOR_SUPPLIED",
+                      "RETURNABLE",
+                      "CONSUMABLE",
+                      "SCRAP"
+                    ],
+                    "default": "RECOVERABLE"
+                  },
+                  "standardRate": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "default": "0"
+                  },
+                  "batchTracked": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/stores": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/stock": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "storeId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/stock-ledger": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "storeId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "materialId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/receipts": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "storeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "supplier": {
+                    "type": "string"
+                  },
+                  "invoiceRef": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "materialId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "rate": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "batchNo": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "materialId",
+                        "quantity",
+                        "rate"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "storeId",
+                  "date",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/requisitions": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "subcontractorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "workOrderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "activityId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "purpose": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "materialId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "materialId",
+                        "quantity"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "date",
+                  "subcontractorId",
+                  "workOrderId",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/requisitions/{id}/{action}": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "approve",
+                "reject"
+              ]
+            },
+            "in": "path",
+            "name": "action",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/issues": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "storeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "subcontractorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "workOrderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "activityId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "requisitionId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "receivedByName": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "materialId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "basis": {
+                          "type": "string",
+                          "enum": [
+                            "RECOVERABLE",
+                            "FREE_ISSUE",
+                            "SUBCONTRACTOR_SUPPLIED",
+                            "RETURNABLE",
+                            "CONSUMABLE",
+                            "SCRAP"
+                          ]
+                        },
+                        "issueRate": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "recoveryRate": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "enum": [
+                                "null"
+                              ],
+                              "nullable": true
+                            }
+                          ]
+                        },
+                        "recoveryTerms": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "batchNo": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "materialId",
+                        "quantity"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "storeId",
+                  "date",
+                  "subcontractorId",
+                  "workOrderId",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "subcontractorId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/issues/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receivedByName": {
+                    "type": "string",
+                    "minLength": 2
+                  }
+                },
+                "required": [
+                  "receivedByName"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/issues/{id}/cancel": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 5
+                  }
+                },
+                "required": [
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/returns": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "storeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "subcontractorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "workOrderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "receivedByName": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "remarks": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "materialId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "condition": {
+                          "type": "string",
+                          "enum": [
+                            "GOOD",
+                            "EXCESS",
+                            "DAMAGED",
+                            "REJECTED",
+                            "SCRAP"
+                          ]
+                        },
+                        "batchNo": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "materialId",
+                        "quantity",
+                        "condition"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "storeId",
+                  "date",
+                  "subcontractorId",
+                  "workOrderId",
+                  "receivedByName",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/transfers": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "storeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fromSubcontractorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "fromWorkOrderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "toSubcontractorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "toWorkOrderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "receivedByName": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "remarks": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "materialId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ]
+                        },
+                        "batchNo": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "materialId",
+                        "quantity"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "storeId",
+                  "date",
+                  "fromSubcontractorId",
+                  "fromWorkOrderId",
+                  "toSubcontractorId",
+                  "toWorkOrderId",
+                  "receivedByName",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/contractor-ledger": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "subcontractorId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "workOrderId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "materialId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/norms": {
+      "get": {
+        "tags": [
+          "reconciliation"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "activityId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "materialId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "normQty": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "normUnit": {
+                    "type": "string",
+                    "enum": [
+                      "CUM",
+                      "SQM",
+                      "RM",
+                      "M",
+                      "KM",
+                      "NO",
+                      "JOINT",
+                      "KG",
+                      "QTL",
+                      "MT",
+                      "BAG",
+                      "LTR",
+                      "HOUR",
+                      "DAY",
+                      "MONTH",
+                      "LS",
+                      "JOB",
+                      "SET"
+                    ]
+                  },
+                  "wastagePercent": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "default": "0"
+                  },
+                  "basis": {
+                    "type": "string",
+                    "minLength": 3
+                  }
+                },
+                "required": [
+                  "activityId",
+                  "materialId",
+                  "normQty",
+                  "normUnit",
+                  "basis"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/norms/{id}/approve": {
+      "post": {
+        "tags": [
+          "reconciliation"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/reconciliations/compute": {
+      "post": {
+        "tags": [
+          "reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subcontractorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "workOrderId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "periodFrom": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "periodTo": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "isFinal": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "closingStock": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "penalRates": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "subcontractorId",
+                  "periodFrom",
+                  "periodTo"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/reconciliations": {
+      "post": {
+        "tags": [
+          "reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subcontractorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "workOrderId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "periodFrom": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "periodTo": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "isFinal": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "closingStock": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "penalRates": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "subcontractorId",
+                  "periodFrom",
+                  "periodTo"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "reconciliation"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/reconciliations/{id}": {
+      "get": {
+        "tags": [
+          "reconciliation"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/reconciliations/{id}/{action}": {
+      "post": {
+        "tags": [
+          "reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "submit",
+                "approve",
+                "reject"
+              ]
+            },
+            "in": "path",
+            "name": "action",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/summary": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "projectId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/reports/portfolio": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ]
+}

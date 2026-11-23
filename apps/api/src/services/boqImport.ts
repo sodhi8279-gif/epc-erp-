@@ -116,6 +116,12 @@ export function validateRows(rows: ImportRow[]): ImportRow[] {
   const seen = new Map<string, number>();
   for (const r of rows) {
     r.issues = [];
+    // Item numbers must be unique across items AND headings: both become BOQ rows with a unique item number.
+    if (r.kind === 'HEADER' && r.itemNo) {
+      const k = r.itemNo.toUpperCase();
+      if (seen.has(k)) r.issues.push({ level: 'error', field: 'itemNo', message: `Duplicate item number (also on source row ${seen.get(k)})` });
+      else seen.set(k, r.rowNo);
+    }
     if (r.kind !== 'ITEM') continue;
     r.unit = r.unit ?? normaliseUnit(r.unitRaw);
     if (!r.itemNo) r.issues.push({ level: 'error', field: 'itemNo', message: 'Item number is missing' });
@@ -140,9 +146,10 @@ export function validateRows(rows: ImportRow[]): ImportRow[] {
 
 export const importSummary = (rows: ImportRow[]) => {
   const items = rows.filter((r) => r.kind === 'ITEM');
+  const headers = rows.filter((r) => r.kind === 'HEADER');
   return {
     items: items.length, headers: rows.filter((r) => r.kind === 'HEADER').length, skipped: rows.filter((r) => r.kind === 'SKIP').length,
-    errors: items.reduce((n, r) => n + r.issues.filter((i) => i.level === 'error').length, 0),
+    errors: [...items, ...headers].reduce((n, r) => n + (r.issues ?? []).filter((i) => i.level === 'error').length, 0),
     warnings: items.reduce((n, r) => n + r.issues.filter((i) => i.level === 'warning').length, 0),
     total: money(items.reduce((s, r) => (r.quantity && r.rate ? s.plus(D(r.quantity).times(r.rate)) : s), D(0))).toString(),
   };

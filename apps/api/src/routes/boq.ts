@@ -195,14 +195,15 @@ const routes: FastifyPluginAsyncZod = async (app) => {
       return { import: imp, document: doc, sheets, parseError, fields: FIELDS };
     });
   });
-  app.get('/imports/:id', { schema: { tags: ['boq-import'], params: idParam } }, async (req) => {
+  // `?sheets=1` also returns the sheet previews for a MAPPED import, so the user can go back and change the mapping.
+  app.get('/imports/:id', { schema: { tags: ['boq-import'], params: idParam, querystring: z.object({ sheets: z.enum(['0', '1']).optional() }) } }, async (req) => {
     const imp = await prisma.boqImport.findUnique({ where: { id: req.params.id } });
     if (!imp) throw notFound('Import');
     const { scope } = await contractScope(imp.contractId);
     await requirePermission(req.user, 'project.view', scope);
     const doc = await prisma.document.findUniqueOrThrow({ where: { id: imp.documentId } });
     const rows = (imp.rows as unknown as ImportRow[] | null) ?? [];
-    return { ...imp, document: doc, summary: importSummary(rows), sheets: imp.status === 'UPLOADED' ? await previewWorkbook(await getObject(doc.storagePath), doc.originalName) : undefined };
+    return { ...imp, document: doc, summary: importSummary(rows), sheets: imp.status === 'UPLOADED' || (imp.status === 'MAPPED' && req.query.sheets === '1') ? await previewWorkbook(await getObject(doc.storagePath), doc.originalName) : undefined };
   });
   const mappingSchema = z.object(Object.fromEntries(FIELDS.map((f) => [f, z.number().int().positive().optional()]))) as z.ZodType<Partial<Record<(typeof FIELDS)[number], number>>>;
   app.post('/imports/:id/map', { schema: { tags: ['boq-import'], params: idParam, body: z.object({ sheetName: z.string(), headerRow: z.number().int().positive(), mapping: mappingSchema }) } }, async (req) => {
