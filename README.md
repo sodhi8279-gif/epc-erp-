@@ -18,6 +18,10 @@ One integrated record for client contract BOQ, subcontractor work, measurements,
 | Materials | Material master with dual units (e.g. Bag/Kg), stores, GRN, requisitions, issue vouchers (recoverable / free issue / returnable…), acknowledgement, printable voucher, returns by condition, transfers between subcontractors or work orders, weighted-average stock ledger, contractor material ledger |
 | Reconciliation | Consumption norms with wastage; A–J statement per material in both units; excess consumption (recovered) kept distinct from unconsumed balance (carried forward, recovered only on final reconciliation); approval workflow |
 
+## Installing for real use
+
+See [docs/INSTALL.md](docs/INSTALL.md): a one-command installer for an Ubuntu VPS (`deploy/vps/install.sh`) and a Windows desktop app (`desktop/`, built with `desktop/build-win.sh`) that connects to it.
+
 ## Run locally
 
 Requirements: Node 22, pnpm 10, PostgreSQL 16.

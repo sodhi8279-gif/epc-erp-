@@ -13,7 +13,7 @@ export function Login() {
   const qc = useQueryClient();
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr(null);
-    try { const r = await api.post<{ token: string }>('/auth/login', { email, password }); auth.set(r.token); await qc.invalidateQueries(); nav('/'); }
+    try { const r = await api.post<{ token: string }>('/auth/login', { email, password }); auth.set(r.token); await qc.fetchQuery({ queryKey: ['me'], queryFn: () => api.get('/auth/me') }); nav('/'); }
     catch (x) { setErr(x); } finally { setBusy(false); }
   };
   return (

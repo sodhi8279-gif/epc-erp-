@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+<title>Connect to your server</title><link rel="stylesheet" href="page.css"></head>
+<body>
+  <aside class="side">
+    <div class="brand">EPC Contracts &amp; Billing</div>
+    <div><div class="lead">One record from client BOQ to subcontractor measurement, material issue and recovery.</div><div class="chain"><div></div></div></div>
+    <div class="foot" id="ver"></div>
+  </aside>
+  <main>
+    <h1>Connect to your company server</h1>
+    <p>Your data lives on your company's server. Enter the address your administrator gave you; you only do this once.</p>
+    <form id="f">
+      <label for="url">Server address</label>
+      <input id="url" placeholder="erp.yourcompany.in" autocomplete="url" spellcheck="false" autofocus>
+      <div class="hint">For example <code>erp.yourcompany.in</code> or <code>http://203.0.113.10</code></div>
+      <button id="go" type="submit">Connect</button>
+    </form>
+    <div class="error" id="err" role="alert"></div>
+  </main>
+  <script src="setup.js"></script>
+</body></html>
