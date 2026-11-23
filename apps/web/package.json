@@ -1,0 +1,26 @@
+{
+  "name": "@epc/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "vite", "build": "tsc --noEmit && vite build", "typecheck": "tsc --noEmit", "test": "echo 'web: covered by e2e'" },
+  "dependencies": {
+    "@epc/shared": "workspace:*",
+    "@fontsource/archivo": "5.3.0",
+    "@fontsource/public-sans": "5.3.0",
+    "@tanstack/react-query": "5.90.2",
+    "lucide-react": "0.577.0",
+    "react": "19.1.10",
+    "react-dom": "19.1.10",
+    "react-router-dom": "7.18.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.1.14",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "5.0.4",
+    "tailwindcss": "4.1.14",
+    "typescript": "5.9.3",
+    "vite": "7.1.9"
+  }
+}

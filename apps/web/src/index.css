@@ -1,0 +1,35 @@
+@import "tailwindcss";
+@import "@fontsource/public-sans/400.css";
+@import "@fontsource/public-sans/500.css";
+@import "@fontsource/public-sans/600.css";
+@import "@fontsource/archivo/600.css";
+@import "@fontsource/archivo/700.css";
+
+/* Design tokens — drawn from engineering drawings and measurement books:
+   drawing ink, cool drafting paper, ruled lines, pipe teal for action, survey amber for exceptions. */
+@theme {
+  --color-ink: #1d2b3a;
+  --color-ink-soft: #4a5a6a;
+  --color-paper: #f7f8f5;
+  --color-sheet: #ffffff;
+  --color-rule: #d5dde0;
+  --color-rule-soft: #e8edee;
+  --color-teal: #0f6e6a;
+  --color-teal-deep: #0a514e;
+  --color-teal-wash: #e3f0ee;
+  --color-amber: #b5651d;
+  --color-amber-wash: #fbf0e4;
+  --color-red: #b42318;
+  --color-red-wash: #fdecea;
+  --color-green: #2f7d32;
+  --color-green-wash: #e7f3e7;
+  --font-sans: "Public Sans", system-ui, sans-serif;
+  --font-display: "Archivo", "Public Sans", sans-serif;
+}
+
+html, body { background: var(--color-paper); color: var(--color-ink); }
+body { font-family: var(--font-sans); font-size: 14px; line-height: 1.45; font-feature-settings: "tnum" 1; }
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
+:focus-visible { outline: 2px solid var(--color-teal); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

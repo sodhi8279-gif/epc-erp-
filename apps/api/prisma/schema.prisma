@@ -1,0 +1,978 @@
+// EPC Contract, BOQ, Subcontractor Billing & Material Reconciliation — database schema
+// Money: Decimal(18,2). Rates: Decimal(18,4). Quantities: Decimal(18,3). Factors: Decimal(18,6).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Organisation & access ─────────────────────────
+
+model Company {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  gstin     String?
+  pan       String?
+  address   String?
+  createdAt DateTime @default(now())
+
+  projects       Project[]
+  roles          Role[]
+  subcontractors Subcontractor[]
+  materials      Material[]
+  assignments    UserRoleAssignment[]
+}
+
+enum ProjectType {
+  WTP
+  STP
+  WATER_SUPPLY
+  PIPELINE
+  PUMPING_STATION
+  SEWERAGE
+  CIVIL
+  RCC_BUILDING
+  MECH_ELEC
+  INDUSTRIAL_EPC
+  HYDRO_MECHANICAL
+  OTHER
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CLOSED
+}
+
+model Project {
+  id         String        @id @default(uuid())
+  companyId  String
+  company    Company       @relation(fields: [companyId], references: [id])
+  code       String
+  name       String
+  type       ProjectType
+  status     ProjectStatus @default(ACTIVE)
+  client     String?
+  location   String?
+  state      String?
+  startDate  DateTime?
+  endDate    DateTime?
+  createdAt  DateTime      @default(now())
+  createdById String?
+
+  contracts      Contract[]
+  workOrders     WorkOrder[]
+  allocations    WorkAllocation[]
+  measurements   Measurement[]
+  stores         Store[]
+  issues         MaterialIssue[]
+  returns        MaterialReturn[]
+  receipts       MaterialReceipt[]
+  requisitions   MaterialRequisition[]
+  norms          ConsumptionNorm[]
+  reconciliations MaterialReconciliation[]
+  progress       ProgressEntry[]
+  assignments    UserRoleAssignment[]
+  sequences      DocSequence[]
+
+  @@unique([companyId, code])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  isSuperAdmin Boolean  @default(false)
+  active       Boolean  @default(true)
+  subcontractorId String? // for portal users
+  createdAt    DateTime @default(now())
+
+  assignments UserRoleAssignment[]
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  companyId   String
+  company     Company          @relation(fields: [companyId], references: [id])
+  code        String
+  name        String
+  department  String
+  permissions RolePermission[]
+  assignments UserRoleAssignment[]
+
+  @@unique([companyId, code])
+}
+
+model RolePermission {
+  roleId     String
+  role       Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission String
+
+  @@id([roleId, permission])
+}
+
+/// A role granted to a user within a company, optionally narrowed to one project and capped by a financial limit.
+model UserRoleAssignment {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId         String
+  role           Role     @relation(fields: [roleId], references: [id])
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id])
+  projectId      String?
+  project        Project? @relation(fields: [projectId], references: [id])
+  financialLimit Decimal? @db.Decimal(18, 2)
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, roleId, projectId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  at         DateTime @default(now())
+  userId     String?
+  userName   String?
+  companyId  String?
+  projectId  String?
+  entityType String
+  entityId   String
+  action     String
+  before     Json?
+  after      Json?
+  reason     String?
+
+  @@index([entityType, entityId])
+  @@index([projectId, at])
+}
+
+/// Generic workflow history for any approvable entity.
+model WorkflowAction {
+  id         String   @id @default(uuid())
+  at         DateTime @default(now())
+  entityType String
+  entityId   String
+  action     String
+  fromStatus String?
+  toStatus   String
+  comment    String?
+  userId     String
+  userName   String
+
+  @@index([entityType, entityId])
+}
+
+/// Gap-free document numbering per project and series (MB, WO, MIV, MRV, GRN…).
+model DocSequence {
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  series    String
+  next      Int     @default(1)
+
+  @@id([projectId, series])
+}
+
+model Document {
+  id           String   @id @default(uuid())
+  companyId    String
+  projectId    String?
+  entityType   String?
+  entityId     String?
+  category     String
+  originalName String
+  mimeType     String
+  size         Int
+  sha256       String
+  storagePath  String
+  uploadedById String
+  uploadedAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
+
+// ───────────────────────── Contracts & BOQ ─────────────────────────
+
+enum ContractType {
+  ITEM_RATE
+  PERCENTAGE_RATE
+  LUMP_SUM
+  EPC
+  DESIGN_BUILD
+}
+
+model Contract {
+  id             String       @id @default(uuid())
+  projectId      String
+  project        Project      @relation(fields: [projectId], references: [id])
+  contractNo     String
+  title          String
+  client         String
+  type           ContractType @default(ITEM_RATE)
+  contractValue  Decimal      @db.Decimal(18, 2)
+  agreementDate  DateTime?
+  loaRef         String?
+  startDate      DateTime?
+  completionDate DateTime?
+  rebatePercent  Decimal      @default(0) @db.Decimal(9, 4)
+  createdAt      DateTime     @default(now())
+
+  revisions  BoqRevision[]
+  activities ExecutionActivity[]
+  imports    BoqImport[]
+
+  @@unique([projectId, contractNo])
+}
+
+enum RevisionType {
+  ORIGINAL
+  REVISED
+  VARIATION
+}
+
+enum RevisionStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  SUPERSEDED
+  REJECTED
+}
+
+/// A BOQ version. Approved revisions are immutable (enforced in the service layer AND by DB triggers).
+model BoqRevision {
+  id               String         @id @default(uuid())
+  contractId       String
+  contract         Contract       @relation(fields: [contractId], references: [id])
+  revisionNo       Int
+  type             RevisionType
+  status           RevisionStatus @default(DRAFT)
+  title            String
+  basedOnId        String?
+  effectiveDate    DateTime?
+  authorityRef     String?
+  remarks          String?
+  sourceDocumentId String?
+  createdById      String
+  createdAt        DateTime       @default(now())
+  approvedById     String?
+  approvedAt       DateTime?
+
+  sections BoqSection[]
+  items    BoqItem[]
+
+  @@unique([contractId, revisionNo])
+}
+
+model BoqSection {
+  id         String      @id @default(uuid())
+  revisionId String
+  revision   BoqRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  code       String
+  name       String
+  sortOrder  Int
+  items      BoqItem[]
+
+  @@unique([revisionId, code])
+}
+
+enum BoqItemKind {
+  ORIGINAL
+  EXTRA
+  SUBSTITUTED
+  DEVIATED
+}
+
+model BoqItem {
+  id          String      @id @default(uuid())
+  revisionId  String
+  revision    BoqRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  sectionId   String?
+  section     BoqSection? @relation(fields: [sectionId], references: [id])
+  /// Stable identity of the item across revisions.
+  itemKey     String
+  itemNo      String
+  description String
+  unit        String
+  quantity    Decimal     @db.Decimal(18, 3)
+  rate        Decimal     @db.Decimal(18, 2)
+  amount      Decimal     @db.Decimal(18, 2)
+  isHeader    Boolean     @default(false)
+  kind        BoqItemKind @default(ORIGINAL)
+  substitutesKey String?
+  specRef     String?
+  drawingRef  String?
+  contractRef String?
+  sortOrder   Int
+
+  measurements Measurement[]
+
+  @@unique([revisionId, itemKey])
+  @@index([itemKey])
+}
+
+enum ImportStatus {
+  UPLOADED
+  MAPPED
+  CONFIRMED
+  CANCELLED
+}
+
+model BoqImport {
+  id          String       @id @default(uuid())
+  contractId  String
+  contract    Contract     @relation(fields: [contractId], references: [id])
+  documentId  String
+  status      ImportStatus @default(UPLOADED)
+  sheetName   String?
+  headerRow   Int?
+  mapping     Json?
+  rows        Json?
+  revisionId  String?
+  createdById String
+  createdAt   DateTime     @default(now())
+}
+
+// ───────────────────────── Execution activities ─────────────────────────
+
+enum AllocationMethod {
+  PERCENT
+  FIXED_RATE
+}
+
+enum ApprovalStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+/// Breakdown of one client BOQ item (by itemKey, so it survives revisions) into executable activities.
+model ExecutionActivity {
+  id               String           @id @default(uuid())
+  contractId       String
+  contract         Contract         @relation(fields: [contractId], references: [id])
+  itemKey          String
+  code             String
+  name             String
+  sequence         Int
+  method           AllocationMethod
+  percentage       Decimal?         @db.Decimal(9, 4)
+  fixedRate        Decimal?         @db.Decimal(18, 2)
+  unit             String
+  /// Activity units per ONE parent BOQ unit (e.g. 0.1667 joints per RM for 6 m pipe lengths).
+  conversionFactor Decimal          @db.Decimal(18, 6)
+  conversionBasis  String?
+  status           ApprovalStatus   @default(DRAFT)
+  approvedById     String?
+  approvedAt       DateTime?
+  active           Boolean          @default(true)
+
+  workOrderItems WorkOrderItem[]
+  allocations    WorkAllocation[]
+  measurements   Measurement[]
+  norms          ConsumptionNorm[]
+  progress       ProgressEntry[]
+
+  @@unique([contractId, itemKey, code])
+}
+
+// ───────────────────────── Subcontractors & work orders ─────────────────────────
+
+enum SubcontractorStatus {
+  ONBOARDING
+  ACTIVE
+  SUSPENDED
+  BLACKLISTED
+  INACTIVE
+}
+
+model Subcontractor {
+  id               String              @id @default(uuid())
+  companyId        String
+  company          Company             @relation(fields: [companyId], references: [id])
+  code             String
+  name             String
+  firmName         String?
+  constitution     String?
+  address          String?
+  state            String?
+  gstin            String?
+  pan              String?
+  contactPerson    String?
+  phone            String?
+  email            String?
+  bankName         String?
+  bankAccount      String?
+  ifsc             String?
+  workCategories   String[]
+  gstRegistered    Boolean             @default(true)
+  gstRate          Decimal             @default(18) @db.Decimal(6, 2)
+  tdsSection       String?             @default("194C")
+  tdsRate          Decimal             @default(1) @db.Decimal(6, 3)
+  retentionPercent Decimal             @default(5) @db.Decimal(6, 3)
+  paymentTermsDays Int                 @default(30)
+  status           SubcontractorStatus @default(ONBOARDING)
+  approvedById     String?
+  approvedAt       DateTime?
+  createdAt        DateTime            @default(now())
+
+  compliance  SubcontractorCompliance[]
+  workOrders  WorkOrder[]
+  allocations WorkAllocation[]
+  issues      MaterialIssue[]
+  returns     MaterialReturn[]
+
+  @@unique([companyId, code])
+}
+
+model SubcontractorCompliance {
+  id              String        @id @default(uuid())
+  subcontractorId String
+  subcontractor   Subcontractor @relation(fields: [subcontractorId], references: [id], onDelete: Cascade)
+  docType         String
+  docNo           String?
+  validFrom       DateTime?
+  validTo         DateTime?
+  documentId      String?
+  verified        Boolean       @default(false)
+  verifiedById    String?
+  verifiedAt      DateTime?
+  remarks         String?
+}
+
+enum WorkOrderStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  SUSPENDED
+  CLOSED
+}
+
+enum MaterialResponsibility {
+  COMPANY_RECOVERABLE
+  COMPANY_FREE_ISSUE
+  SUBCONTRACTOR
+  MIXED
+}
+
+model WorkOrder {
+  id                     String                 @id @default(uuid())
+  projectId              String
+  project                Project                @relation(fields: [projectId], references: [id])
+  subcontractorId        String
+  subcontractor          Subcontractor          @relation(fields: [subcontractorId], references: [id])
+  woNo                   String
+  title                  String
+  description            String?
+  startDate              DateTime?
+  completionDate         DateTime?
+  materialResponsibility MaterialResponsibility @default(COMPANY_RECOVERABLE)
+  retentionPercent       Decimal                @db.Decimal(6, 3)
+  securityDepositPercent Decimal                @default(0) @db.Decimal(6, 3)
+  advanceAmount          Decimal                @default(0) @db.Decimal(18, 2)
+  advanceRecoveryPercent Decimal                @default(0) @db.Decimal(6, 3)
+  paymentTerms           String?
+  recoveryConditions     String?
+  otherDeductions        String?
+  status                 WorkOrderStatus        @default(DRAFT)
+  value                  Decimal                @default(0) @db.Decimal(18, 2)
+  createdById            String
+  createdAt              DateTime               @default(now())
+  approvedById           String?
+  approvedAt             DateTime?
+
+  items        WorkOrderItem[]
+  amendments   WorkOrderAmendment[]
+  allocations  WorkAllocation[]
+  measurements Measurement[]
+  issues       MaterialIssue[]
+
+  @@unique([projectId, woNo])
+}
+
+model WorkOrderItem {
+  id          String            @id @default(uuid())
+  workOrderId String
+  workOrder   WorkOrder         @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  activityId  String
+  activity    ExecutionActivity @relation(fields: [activityId], references: [id])
+  lineNo      Int
+  description String
+  unit        String
+  quantity    Decimal           @db.Decimal(18, 3)
+  /// Current approved rate. History lives in WorkOrderItemRate.
+  rate        Decimal           @db.Decimal(18, 2)
+  amount      Decimal           @db.Decimal(18, 2)
+
+  rates        WorkOrderItemRate[]
+  allocations  WorkAllocation[]
+  measurements Measurement[]
+}
+
+/// Rate history: every approved rate applies from effectiveFrom; measurements pick the rate in force on their date.
+model WorkOrderItemRate {
+  id              String        @id @default(uuid())
+  workOrderItemId String
+  workOrderItem   WorkOrderItem @relation(fields: [workOrderItemId], references: [id], onDelete: Cascade)
+  rate            Decimal       @db.Decimal(18, 2)
+  effectiveFrom   DateTime
+  amendmentId     String?
+  approvedById    String
+  approvedAt      DateTime      @default(now())
+}
+
+model WorkOrderAmendment {
+  id           String         @id @default(uuid())
+  workOrderId  String
+  workOrder    WorkOrder      @relation(fields: [workOrderId], references: [id])
+  amendmentNo  Int
+  reason       String
+  effectiveFrom DateTime
+  /// [{workOrderItemId?, activityId?, description?, unit?, newRate?, newQuantity?}]
+  changes      Json
+  status       ApprovalStatus @default(SUBMITTED)
+  createdById  String
+  createdAt    DateTime       @default(now())
+  approvedById String?
+  approvedAt   DateTime?
+
+  @@unique([workOrderId, amendmentNo])
+}
+
+// ───────────────────────── Allocation ─────────────────────────
+
+enum AllocationStatus {
+  ACTIVE
+  PENDING_EXCEPTION
+  REJECTED
+  CANCELLED
+}
+
+model WorkAllocation {
+  id              String            @id @default(uuid())
+  projectId       String
+  project         Project           @relation(fields: [projectId], references: [id])
+  activityId      String
+  activity        ExecutionActivity @relation(fields: [activityId], references: [id])
+  workOrderId     String
+  workOrder       WorkOrder         @relation(fields: [workOrderId], references: [id])
+  workOrderItemId String
+  workOrderItem   WorkOrderItem     @relation(fields: [workOrderItemId], references: [id])
+  subcontractorId String
+  subcontractor   Subcontractor     @relation(fields: [subcontractorId], references: [id])
+  quantity        Decimal           @db.Decimal(18, 3)
+  zone            String?
+  chainageFrom    Decimal?          @db.Decimal(18, 3)
+  chainageTo      Decimal?          @db.Decimal(18, 3)
+  remarks         String?
+  status          AllocationStatus  @default(ACTIVE)
+  exceptions      String[]
+  exceptionReason String?
+  createdById     String
+  createdAt       DateTime          @default(now())
+  approvedById    String?
+  approvedAt      DateTime?
+
+  measurements Measurement[]
+  progress     ProgressEntry[]
+}
+
+/// Daily site progress (physical execution), distinct from measurement and certification.
+model ProgressEntry {
+  id              String          @id @default(uuid())
+  projectId       String
+  project         Project         @relation(fields: [projectId], references: [id])
+  activityId      String
+  activity        ExecutionActivity @relation(fields: [activityId], references: [id])
+  allocationId    String?
+  allocation      WorkAllocation? @relation(fields: [allocationId], references: [id])
+  subcontractorId String
+  date            DateTime
+  quantity        Decimal         @db.Decimal(18, 3)
+  location        String?
+  chainageFrom    Decimal?        @db.Decimal(18, 3)
+  chainageTo      Decimal?        @db.Decimal(18, 3)
+  manpower        Int?
+  remarks         String?
+  createdById     String
+  createdAt       DateTime        @default(now())
+
+  @@index([activityId, date])
+}
+
+// ───────────────────────── Measurement book ─────────────────────────
+
+enum MeasurementStatus {
+  DRAFT
+  SUBMITTED
+  SE_VERIFIED
+  BILLING_SCRUTINIZED
+  PM_APPROVED
+  COMMERCIAL_REVIEWED
+  CERTIFIED
+  RETURNED
+  REVERSED
+}
+
+enum MeasurementType {
+  GENERIC
+  PIPELINE
+  EXCAVATION
+  RCC
+  REBAR
+}
+
+model Measurement {
+  id              String            @id @default(uuid())
+  projectId       String
+  project         Project           @relation(fields: [projectId], references: [id])
+  measurementNo   String
+  mbNo            String?
+  mbPage          String?
+  date            DateTime
+  type            MeasurementType
+  workOrderId     String
+  workOrder       WorkOrder         @relation(fields: [workOrderId], references: [id])
+  workOrderItemId String
+  workOrderItem   WorkOrderItem     @relation(fields: [workOrderItemId], references: [id])
+  activityId      String
+  activity        ExecutionActivity @relation(fields: [activityId], references: [id])
+  /// BOQ item of the revision in force on the measurement date.
+  boqItemId       String
+  boqItem         BoqItem           @relation(fields: [boqItemId], references: [id])
+  allocationId    String?
+  allocation      WorkAllocation?   @relation(fields: [allocationId], references: [id])
+  location        String?
+  structure       String?
+  drawingRef      String?
+  zone            String?
+  chainageFrom    Decimal?          @db.Decimal(18, 3)
+  chainageTo      Decimal?          @db.Decimal(18, 3)
+  /// Type-specific attributes: pipe id/dia/material, concrete grade, BBS ref, test details…
+  attributes      Json?
+  measurementRule String?
+  quantity        Decimal           @db.Decimal(18, 3)
+  unit            String
+  /// Rate in force on the measurement date (snapshotted at approval).
+  rate            Decimal?          @db.Decimal(18, 2)
+  status          MeasurementStatus @default(DRAFT)
+  revision        Int               @default(1)
+  reversalOfId    String?
+  reversedById    String?
+  remarks         String?
+  createdById     String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  lines     MeasurementLine[]
+  snapshots MeasurementSnapshot[]
+
+  @@unique([projectId, measurementNo])
+  @@index([activityId, status])
+}
+
+model MeasurementLine {
+  id            String      @id @default(uuid())
+  measurementId String
+  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  lineNo        Int
+  description   String?
+  nos           Decimal?    @db.Decimal(18, 3)
+  length        Decimal?    @db.Decimal(18, 3)
+  breadth       Decimal?    @db.Decimal(18, 3)
+  depth         Decimal?    @db.Decimal(18, 3)
+  chainageFrom  Decimal?    @db.Decimal(18, 3)
+  chainageTo    Decimal?    @db.Decimal(18, 3)
+  barDia        Decimal?    @db.Decimal(9, 2)
+  cuttingLength Decimal?    @db.Decimal(18, 3)
+  unitWeight    Decimal?    @db.Decimal(18, 4)
+  directQty     Decimal?    @db.Decimal(18, 3)
+  isDeduction   Boolean     @default(false)
+  quantity      Decimal     @db.Decimal(18, 3)
+  formula       String
+}
+
+/// Immutable copy of every submitted revision of a measurement.
+model MeasurementSnapshot {
+  id            String      @id @default(uuid())
+  measurementId String
+  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  revision      Int
+  data          Json
+  createdAt     DateTime    @default(now())
+}
+
+// ───────────────────────── Materials ─────────────────────────
+
+enum MaterialCategory {
+  CEMENT
+  STEEL
+  STRUCTURAL_STEEL
+  PIPE
+  FITTING
+  VALVE
+  ELECTRODE
+  FASTENER
+  AGGREGATE
+  SAND
+  ADMIXTURE
+  CONSUMABLE
+  TOOL
+  OTHER
+}
+
+/// How a material is supplied to subcontractors.
+enum SupplyBasis {
+  RECOVERABLE
+  FREE_ISSUE
+  SUBCONTRACTOR_SUPPLIED
+  RETURNABLE
+  CONSUMABLE
+  SCRAP
+}
+
+model Material {
+  id            String           @id @default(uuid())
+  companyId     String
+  company       Company          @relation(fields: [companyId], references: [id])
+  code          String
+  name          String
+  category      MaterialCategory
+  unit          String
+  /// Optional secondary unit, e.g. KG for cement stocked in BAG (altFactor = 50 KG per BAG).
+  altUnit       String?
+  altFactor     Decimal?         @db.Decimal(18, 6)
+  defaultBasis  SupplyBasis      @default(RECOVERABLE)
+  standardRate  Decimal          @default(0) @db.Decimal(18, 4)
+  batchTracked  Boolean          @default(false)
+  active        Boolean          @default(true)
+
+  stock     StockTransaction[]
+  norms     ConsumptionNorm[]
+
+  @@unique([companyId, code])
+}
+
+model Store {
+  id        String  @id @default(uuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  code      String
+  name      String
+  location  String?
+
+  stock StockTransaction[]
+
+  @@unique([projectId, code])
+}
+
+enum StockTxnType {
+  RECEIPT
+  ISSUE
+  RETURN
+  TRANSFER_IN
+  TRANSFER_OUT
+  ADJUSTMENT
+  SCRAP_OUT
+}
+
+/// Append-only stock ledger. Quantity is signed (+ in / − out) in the material's base unit.
+model StockTransaction {
+  id         String       @id @default(uuid())
+  storeId    String
+  store      Store        @relation(fields: [storeId], references: [id])
+  materialId String
+  material   Material     @relation(fields: [materialId], references: [id])
+  date       DateTime
+  type       StockTxnType
+  quantity   Decimal      @db.Decimal(18, 3)
+  rate       Decimal      @db.Decimal(18, 4)
+  value      Decimal      @db.Decimal(18, 2)
+  batchNo    String?
+  refType    String
+  refId      String
+  refNo      String
+  createdAt  DateTime     @default(now())
+
+  @@index([storeId, materialId, date])
+}
+
+model MaterialReceipt {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  storeId     String
+  grnNo       String
+  date        DateTime
+  supplier    String?
+  invoiceRef  String?
+  remarks     String?
+  createdById String
+  createdAt   DateTime @default(now())
+  /// [{materialId, quantity, rate, batchNo}]
+  lines       Json
+
+  @@unique([projectId, grnNo])
+}
+
+model MaterialRequisition {
+  id              String         @id @default(uuid())
+  projectId       String
+  project         Project        @relation(fields: [projectId], references: [id])
+  reqNo           String
+  date            DateTime
+  subcontractorId String
+  workOrderId     String
+  activityId      String?
+  purpose         String?
+  /// [{materialId, quantity}]
+  lines           Json
+  status          ApprovalStatus @default(SUBMITTED)
+  createdById     String
+  approvedById    String?
+  approvedAt      DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@unique([projectId, reqNo])
+}
+
+enum IssueStatus {
+  ISSUED
+  ACKNOWLEDGED
+  CANCELLED
+}
+
+model MaterialIssue {
+  id              String              @id @default(uuid())
+  projectId       String
+  project         Project             @relation(fields: [projectId], references: [id])
+  voucherNo       String
+  date            DateTime
+  storeId         String
+  subcontractorId String
+  subcontractor   Subcontractor       @relation(fields: [subcontractorId], references: [id])
+  workOrderId     String
+  workOrder       WorkOrder           @relation(fields: [workOrderId], references: [id])
+  activityId      String?
+  requisitionId   String?
+  transferFromReturnId String?
+  issuedById      String
+  issuedByName    String
+  receivedByName  String?
+  acknowledgedAt  DateTime?
+  status          IssueStatus         @default(ISSUED)
+  remarks         String?
+  createdAt       DateTime            @default(now())
+
+  lines MaterialIssueLine[]
+
+  @@unique([projectId, voucherNo])
+}
+
+model MaterialIssueLine {
+  id           String        @id @default(uuid())
+  issueId      String
+  issue        MaterialIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  materialId   String
+  quantity     Decimal       @db.Decimal(18, 3)
+  issueRate    Decimal       @db.Decimal(18, 4)
+  issueValue   Decimal       @db.Decimal(18, 2)
+  basis        SupplyBasis
+  recoveryRate Decimal       @default(0) @db.Decimal(18, 4)
+  recoveryTerms String?
+  batchNo      String?
+}
+
+enum ReturnCondition {
+  GOOD
+  EXCESS
+  DAMAGED
+  REJECTED
+  SCRAP
+}
+
+model MaterialReturn {
+  id              String          @id @default(uuid())
+  projectId       String
+  project         Project         @relation(fields: [projectId], references: [id])
+  voucherNo       String
+  date            DateTime
+  storeId         String
+  subcontractorId String
+  subcontractor   Subcontractor   @relation(fields: [subcontractorId], references: [id])
+  workOrderId     String
+  /// Set when the return is one side of a transfer to another subcontractor / work order.
+  transferToIssueId String?
+  receivedByName  String
+  createdById     String
+  remarks         String?
+  createdAt       DateTime        @default(now())
+
+  lines MaterialReturnLine[]
+
+  @@unique([projectId, voucherNo])
+}
+
+model MaterialReturnLine {
+  id         String          @id @default(uuid())
+  returnId   String
+  ret        MaterialReturn  @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  materialId String
+  quantity   Decimal         @db.Decimal(18, 3)
+  condition  ReturnCondition
+  rate       Decimal         @db.Decimal(18, 4)
+  /// Whether the returned material goes back into usable stock.
+  restock    Boolean         @default(true)
+  batchNo    String?
+}
+
+/// Approved theoretical consumption per unit of an execution activity.
+model ConsumptionNorm {
+  id             String            @id @default(uuid())
+  projectId      String
+  project        Project           @relation(fields: [projectId], references: [id])
+  activityId     String
+  activity       ExecutionActivity @relation(fields: [activityId], references: [id])
+  materialId     String
+  material       Material          @relation(fields: [materialId], references: [id])
+  /// Quantity of material (in normUnit) per ONE activity unit.
+  normQty        Decimal           @db.Decimal(18, 6)
+  normUnit       String
+  wastagePercent Decimal           @default(0) @db.Decimal(6, 3)
+  basis          String
+  status         ApprovalStatus    @default(DRAFT)
+  approvedById   String?
+  approvedAt     DateTime?
+
+  @@unique([activityId, materialId])
+}
+
+model MaterialReconciliation {
+  id              String         @id @default(uuid())
+  projectId       String
+  project         Project        @relation(fields: [projectId], references: [id])
+  reconNo         String
+  subcontractorId String
+  workOrderId     String?
+  periodFrom      DateTime
+  periodTo        DateTime
+  isFinal         Boolean        @default(false)
+  /// Computed statement lines per material (A–J values, basis and flags).
+  lines           Json
+  totalRecoverable Decimal       @db.Decimal(18, 2)
+  status          ApprovalStatus @default(DRAFT)
+  createdById     String
+  createdAt       DateTime       @default(now())
+  approvedById    String?
+  approvedAt      DateTime?
+
+  @@unique([projectId, reconNo])
+}
