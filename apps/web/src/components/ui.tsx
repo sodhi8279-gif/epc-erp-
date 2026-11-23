@@ -116,7 +116,9 @@ const TONES: Record<string, string> = {
   green: 'bg-green-wash text-green border-green/25', grey: 'bg-rule-soft text-ink-soft border-rule', blue: 'bg-[#e8eef7] text-[#2b4c7e] border-[#2b4c7e]/20',
   teal: 'bg-teal-wash text-teal-deep border-teal/25', amber: 'bg-amber-wash text-amber border-amber/30', red: 'bg-red-wash text-red border-red/25',
 };
+const STATUS_LABEL: Record<string, string> = { SE_VERIFIED: 'SE verified', BILLING_SCRUTINIZED: 'Billing scrutinised', PM_APPROVED: 'PM approved', COMMERCIAL_REVIEWED: 'Commercial reviewed', PENDING_EXCEPTION: 'Exception pending' };
 export function Status({ value, label }: { value: string; label?: string }) {
+  label = label ?? STATUS_LABEL[value];
   return <span className={cx('inline-flex items-center rounded-[3px] border px-1.5 py-px text-xs font-medium whitespace-nowrap', TONES[STATUS_TONE[value] ?? 'grey'])}>{label ?? humanize(value)}</span>;
 }
 export function Tag({ children, tone = 'grey' }: { children: ReactNode; tone?: keyof typeof TONES }) {
