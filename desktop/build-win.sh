@@ -17,4 +17,4 @@ if command -v makensis >/dev/null; then MAKENSIS=makensis; else
 OUT="dist/EPC-Contracts-Setup-$VERSION.exe"
 "$MAKENSIS" -V2 -DVERSION="$VERSION" -DAPPDIR="$PWD/dist/win-unpacked" -DICON="$PWD/build/icon.ico" -DOUTFILE="$PWD/$OUT" build/installer.nsi
 echo "{ \"serverUrl\": \"\" }" > server.json
-sha256sum "$OUT" | tee "$OUT.sha256"
+(cd dist && sha256sum "$(basename "$OUT")" | tee "$(basename "$OUT").sha256")
