@@ -36,7 +36,7 @@ const GridRow = memo(function GridRow({ r, i, issues, selected, readOnly, onChan
       </td>
       <td className="px-1 py-1">
         {item && <>
-          <select aria-label="Unit" disabled={readOnly} value={r.unit ?? ''} onChange={(e) => onChange(i, { unit: e.target.value || null })} className={cx(cell, tone(issues, 'unit'), 'w-[84px]')}>
+          <select aria-label="Unit" disabled={readOnly} value={r.unit ?? ''} onChange={(e) => onChange(i, { unit: e.target.value || null, unitInferred: null })} className={cx(cell, tone(issues, 'unit'), 'w-[84px]')}>
             <option value="">—</option>
             {UNIT_CODES.map((u) => <option key={u} value={u}>{unitLabel(u)}</option>)}
           </select>
@@ -86,6 +86,7 @@ export function ReviewGrid({ rows, setRows, issues, readOnly }: { rows: ImportRo
     return [...m.entries()].sort((a, b) => b[1] - a[1]);
   }, [rows]);
   const missingUnit = useMemo(() => rows.filter((r) => r.kind === 'ITEM' && !r.unit && !r.unitRaw.trim()).length, [rows]);
+  const inferredUnit = useMemo(() => rows.filter((r) => r.kind === 'ITEM' && r.unit && r.unitInferred && !r.unitRaw.trim()).length, [rows]);
 
   const allVisibleSelected = visible.length > 0 && visible.every((i) => sel.has(rows[i].rowNo));
   const toggleAll = () => setSel((s) => { const n = new Set(s); if (allVisibleSelected) visible.forEach((i) => n.delete(rows[i].rowNo)); else visible.forEach((i) => n.add(rows[i].rowNo)); return n; });
@@ -94,10 +95,11 @@ export function ReviewGrid({ rows, setRows, issues, readOnly }: { rows: ImportRo
 
   return (
     <div className="rounded-[4px] border border-rule bg-sheet">
-      {!readOnly && (unknownUnits.length > 0 || missingUnit > 0) && (
+      {!readOnly && (unknownUnits.length > 0 || missingUnit > 0 || inferredUnit > 0) && (
         <div className="border-b border-rule-soft px-4 py-3">
           <div className="text-[13px] font-medium">Units to resolve</div>
           <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px]">
+            {inferredUnit > 0 && <span>{inferredUnit} items had no unit in the file; it was filled in from the description or the item above. <button type="button" className="text-teal underline" onClick={() => { setFilter('warnings'); setLimit(PAGE); }}>Check them</button>.</span>}
             {missingUnit > 0 && <span>{missingUnit} items have no unit in the file. <button type="button" className="text-teal underline" onClick={() => { setFilter('nounit'); setLimit(PAGE); }}>Show them</button>, select and set the unit in bulk.</span>}
             {unknownUnits.map(([raw, n]) => (
               <span key={raw} className="inline-flex items-center gap-1.5">
@@ -133,7 +135,7 @@ export function ReviewGrid({ rows, setRows, issues, readOnly }: { rows: ImportRo
             <option value="">Unit…</option>
             {UNIT_CODES.map((u) => <option key={u} value={u}>{unitLabel(u)}</option>)}
           </select>
-          <Button size="sm" disabled={!sel.size || !bulkUnit} onClick={() => applyToSelected({ unit: bulkUnit })}>Set unit</Button>
+          <Button size="sm" disabled={!sel.size || !bulkUnit} onClick={() => applyToSelected({ unit: bulkUnit, unitInferred: null })}>Set unit</Button>
           <select aria-label="Kind to set" value={bulkKind} onChange={(e) => setBulkKind(e.target.value as RowKind)} className={cx(small, "w-[100px]")}>
             {KINDS.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}
           </select>

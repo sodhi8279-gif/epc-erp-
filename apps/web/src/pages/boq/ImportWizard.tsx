@@ -28,6 +28,9 @@ function Steps({ current }: { current: Step }) {
   );
 }
 
+export const BOQ_ACCEPT = '.xlsx,.csv,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv';
+export const BOQ_SOURCE_HELP = 'Upload the client BOQ, or a running (RA) bill that lists the items, as Excel (.xlsx / .csv) or PDF. The table is read from the file; you then check the columns, correct the rows and create a draft BOQ. Totals, page headers and the recoveries / deductions part of a bill are left out. A PDF must contain text: a scanned copy cannot be read. The original file is kept as the source document of the revision.';
+
 export function ImportWizard() {
   const { projectId } = useProject();
   const { contractId, importId } = useParams();
@@ -74,12 +77,12 @@ export function ImportWizard() {
   const confirm = useAction(() => api.post(`/imports/${importId}/confirm`, { title: title.trim() || defaultTitle, acknowledgeWarnings: ack }), {
     onSuccess: (r: any) => nav(`${base}/revisions/${r.revision.id}`),
   });
-  const defaultTitle = approved ? `Revised BOQ imported from ${imp?.document?.originalName ?? 'Excel'}` : `Original BOQ imported from ${imp?.document?.originalName ?? 'Excel'}`;
+  const defaultTitle = approved ? `Revised BOQ imported from ${imp?.document?.originalName ?? 'file'}` : `Original BOQ imported from ${imp?.document?.originalName ?? 'file'}`;
 
   const current: Step = !importId ? 'upload' : imp?.status === 'UPLOADED' || remap ? 'map' : imp?.status === 'MAPPED' ? step : imp?.status === 'CONFIRMED' ? 'confirm' : 'upload';
   const header = (
     <PageHeader back={<><Link to={`/p/${projectId}/contracts`} className="hover:underline">Contracts</Link> / <Link to={base} className="hover:underline">{contract?.contractNo ?? 'Contract'}</Link></>}
-      title="Import BOQ from Excel"
+      title="Import BOQ"
       description="Every extracted row is reviewed here before anything enters the BOQ. Confirming creates a draft revision that still has to be submitted and approved."
       actions={imp && <><span className="text-[13px] text-ink-soft"><FileSpreadsheet className="mr-1 inline size-4" />{imp.document?.originalName}</span><Status value={imp.status} /></>} />
   );
@@ -96,9 +99,9 @@ export function ImportWizard() {
         {open && <div className="mb-4"><Notice tone="warning" title={`Revision R${open.revisionNo} is still ${open.status.toLowerCase()}`}>An import can be prepared now, but the draft can only be created after R{open.revisionNo} is approved, returned or discarded.</Notice></div>}
         <Sheet title="Source file" className="max-w-2xl">
           <div className="grid gap-3">
-            <p className="text-[13px] text-ink-soft">Upload the client BOQ as .xlsx or .csv. The original file is stored as the source document of the revision. PDF BOQs must first be converted to Excel; expect missing units and broken numbers from conversions, which you can fix in the review step.</p>
-            <Field label="BOQ file (.xlsx or .csv)">
-              <input type="file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" onChange={(e) => { setFile(e.target.files?.[0] ?? null); setParseError(null); upload.reset(); }}
+            <p className="text-[13px] text-ink-soft">{BOQ_SOURCE_HELP}</p>
+            <Field label="BOQ or RA bill (.xlsx, .csv or .pdf)">
+              <input type="file" accept={BOQ_ACCEPT} onChange={(e) => { setFile(e.target.files?.[0] ?? null); setParseError(null); upload.reset(); }}
                 className="block w-full text-[13px] file:mr-3 file:h-9 file:rounded-[3px] file:border file:border-rule file:bg-sheet file:px-3 file:text-ink hover:file:border-ink-soft" />
             </Field>
             {upload.error ? <Notice error={upload.error} /> : null}

@@ -65,7 +65,8 @@ export function MappingStep({ sheets, initial, busy, error, onSubmit, onCancel }
             </Field>
           ))}
         </div>
-        {!mapping.unit && <p className="mt-3 text-[13px] text-amber">Without a unit column every item will need its unit set in the review step.</p>}
+        <p className="mt-3 text-[13px] text-ink-soft">From a running (RA) bill: map Quantity to the agreement / BOQ quantity column if the bill shows one, otherwise to the up-to-date quantity. Map Amount to the matching amount column.</p>
+        {!mapping.unit && <p className="mt-2 text-[13px] text-amber">Without a unit column every item will need its unit set in the review step.</p>}
         {dupCols.length > 0 && <p className="mt-2 text-[13px] text-amber">One column is mapped to more than one field: {dupCols.map((v) => v.map(fieldLabel).join(' and ')).join('; ')}.</p>}
       </Sheet>
 

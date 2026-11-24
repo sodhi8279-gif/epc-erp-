@@ -38,7 +38,9 @@ describe('BOQ import engine', () => {
     const items = rows.filter((r) => r.kind === 'ITEM');
     expect(rows.find((r) => r.itemNo === '1.00. A')!.kind).toBe('HEADER');
     expect(items[0].rate).toBe('520000');
-    expect(items[1].issues.map((i) => i.message)).toContain('Unit is missing');
+    // No unit in the file: taken from the other item under the same heading, with a warning to check it.
+    expect(items[1].unit).toBe('JOB');
+    expect(items[1].issues.map((i) => i.message)).toContain('Unit not in the file; taken as JOB from item 1.01. A under the same heading');
     expect(items[2].issues.some((i) => /≠ qty × rate/.test(i.message))).toBe(true); // 2 × 123000 ≠ 240000
     expect(items[3].issues.some((i) => /Duplicate item number/.test(i.message))).toBe(true);
     // Footer row: text only in the item-number column and no description → still an ITEM with errors? No: it has no description or numbers → SKIP
@@ -65,6 +67,7 @@ describe('BOQ import wizard API', () => {
     expect(document.sha256).toHaveLength(64);
     const mapped = await api.post(`/imports/${imp.id}/map`, { sheetName: sheets[0].name, headerRow: sheets[0].suggestedHeaderRow, mapping: sheets[0].suggestedMapping });
     expect(mapped.summary.errors).toBeGreaterThan(0);
+    expect(mapped.rows.find((r: any) => r.itemNo === '1.02. A').unitInferred).toMatch(/taken as JOB/);
     expect((await api.call('POST', `/imports/${imp.id}/confirm`, { title: 'Original' })).status).toBe(400);
     // User corrections: set the missing unit and drop the duplicate row
     const rows = mapped.rows.map((r: any) => (r.itemNo === '1.02. A' ? { ...r, unit: 'JOB', unitRaw: 'job' } : r)).filter((r: any) => r.description !== 'Duplicate number row');
@@ -88,6 +91,9 @@ describe('BOQ import wizard API', () => {
     const wb = await readWorkbook(fs.readFileSync(p), 'x.xlsx');
     const rows = extractRows(sheetMatrix(wb.worksheets[0]), sheet.suggestedHeaderRow!, sheet.suggestedMapping);
     const items = rows.filter((r) => r.kind === 'ITEM');
+    expect(items.find((r) => r.itemNo === '10.04.C')).toBeTruthy(); // item number broken across lines is rejoined
+    expect(rows.filter((r) => /^Work ID/.test(r.itemNo) && r.kind !== 'SKIP')).toHaveLength(0); // page footers
+    expect(items.some((r) => /Recover|Release Amount|Income Tax/i.test(r.description))).toBe(false); // payment memorandum is not BOQ
     console.log(`real RA bill: ${items.length} items, ${rows.filter((r) => r.kind === 'HEADER').length} headings, ${items.filter((r) => r.issues.some((i) => i.level === 'error')).length} rows with errors`);
     expect(items.length).toBeGreaterThan(50);
   });

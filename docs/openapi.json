@@ -267,6 +267,78 @@
                       "COMPLETED",
                       "CLOSED"
                     ]
+                  },
+                  "contract": {
+                    "type": "object",
+                    "properties": {
+                      "contractNo": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 3
+                      },
+                      "client": {
+                        "type": "string",
+                        "minLength": 2
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "ITEM_RATE",
+                          "PERCENTAGE_RATE",
+                          "LUMP_SUM",
+                          "EPC",
+                          "DESIGN_BUILD"
+                        ],
+                        "default": "ITEM_RATE"
+                      },
+                      "contractValue": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "default": "0"
+                      },
+                      "agreementDate": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "loaRef": {
+                        "type": "string"
+                      },
+                      "startDate": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "completionDate": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "rebatePercent": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "contractNo"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "agreementDocumentId": {
+                    "type": "string",
+                    "format": "uuid"
                   }
                 },
                 "required": [
@@ -389,6 +461,18 @@
             "name": "id",
             "required": true
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/agreements/extract": {
+      "post": {
+        "tags": [
+          "org"
         ],
         "responses": {
           "200": {
@@ -1662,7 +1746,8 @@
                       "MONTH",
                       "LS",
                       "JOB",
-                      "SET"
+                      "SET",
+                      "PAIR"
                     ]
                   },
                   "quantity": {
@@ -1792,7 +1877,8 @@
                       "MONTH",
                       "LS",
                       "JOB",
-                      "SET"
+                      "SET",
+                      "PAIR"
                     ]
                   },
                   "quantity": {
@@ -2090,6 +2176,10 @@
                           "type": "string",
                           "nullable": true
                         },
+                        "unitInferred": {
+                          "type": "string",
+                          "nullable": true
+                        },
                         "quantity": {
                           "type": "string",
                           "nullable": true
@@ -2351,7 +2441,8 @@
                             "MONTH",
                             "LS",
                             "JOB",
-                            "SET"
+                            "SET",
+                            "PAIR"
                           ]
                         },
                         "conversionFactor": {
@@ -5358,7 +5449,8 @@
                       "MONTH",
                       "LS",
                       "JOB",
-                      "SET"
+                      "SET",
+                      "PAIR"
                     ]
                   },
                   "altUnit": {
@@ -5381,7 +5473,8 @@
                       "MONTH",
                       "LS",
                       "JOB",
-                      "SET"
+                      "SET",
+                      "PAIR"
                     ],
                     "nullable": true
                   },
@@ -5520,7 +5613,8 @@
                       "MONTH",
                       "LS",
                       "JOB",
-                      "SET"
+                      "SET",
+                      "PAIR"
                     ],
                     "nullable": true
                   },
@@ -6665,7 +6759,8 @@
                       "MONTH",
                       "LS",
                       "JOB",
-                      "SET"
+                      "SET",
+                      "PAIR"
                     ]
                   },
                   "wastagePercent": {

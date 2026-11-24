@@ -20,6 +20,7 @@ export const UNITS = {
   LS: { label: 'LS', name: 'Lump sum', dim: 'lumpsum' },
   JOB: { label: 'Job', name: 'Job', dim: 'lumpsum' },
   SET: { label: 'Set', name: 'Set', dim: 'count' },
+  PAIR: { label: 'Pair', name: 'Pair', dim: 'count' },
 } as const;
 export type UnitCode = keyof typeof UNITS;
 export const UNIT_CODES = Object.keys(UNITS) as UnitCode[];
@@ -45,7 +46,7 @@ const ALIASES: Record<string, UnitCode> = {
   KG: 'KG', KGS: 'KG', QTL: 'QTL', QUINTAL: 'QTL', MT: 'MT', TONNE: 'MT', TON: 'MT', TONNES: 'MT',
   BAG: 'BAG', BAGS: 'BAG', LTR: 'LTR', LITRE: 'LTR', L: 'LTR',
   HOUR: 'HOUR', HR: 'HOUR', HRS: 'HOUR', DAY: 'DAY', DAYS: 'DAY', MONTH: 'MONTH',
-  LS: 'LS', 'L.S': 'LS', 'L.S.': 'LS', LUMPSUM: 'LS', JOB: 'JOB', SET: 'SET', SETS: 'SET',
+  LS: 'LS', 'L.S': 'LS', 'L.S.': 'LS', LUMPSUM: 'LS', JOB: 'JOB', SET: 'SET', SETS: 'SET', PAIR: 'PAIR', PAIRS: 'PAIR',
 };
 /** Normalise a unit string from an imported document. Returns null if not recognised (user must map it). */
 export const normaliseUnit = (raw: unknown): UnitCode | null => {

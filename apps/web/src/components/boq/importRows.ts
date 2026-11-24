@@ -18,6 +18,8 @@ export interface Issue { level: 'error' | 'warning'; field?: ImportField; messag
 export interface ImportRow {
   rowNo: number; kind: RowKind; itemNo: string; description: string; unitRaw: string; unit: string | null;
   quantity: string | null; rate: string | null; amount: string | null; specRef?: string | null; drawingRef?: string | null; issues?: Issue[];
+  /** Set when the unit was not in the file and was filled in from the description or a neighbouring item. */
+  unitInferred?: string | null;
 }
 export interface ImportSummary { items: number; headers: number; skipped: number; errors: number; warnings: number; total: string }
 
@@ -44,6 +46,7 @@ export function computeIssues(rows: ImportRow[]): Issue[][] {
     if (!r.itemNo.trim()) out.push({ level: 'error', field: 'itemNo', message: 'Item number is missing' });
     if (!r.description.trim()) out.push({ level: 'error', field: 'description', message: 'Description is missing' });
     if (!unit) out.push({ level: 'error', field: 'unit', message: r.unitRaw ? `Unit "${r.unitRaw}" not recognised` : 'Unit is missing' });
+    else if (r.unitInferred && !r.unitRaw) out.push({ level: 'warning', field: 'unit', message: r.unitInferred });
     if (q === null) out.push({ level: 'error', field: 'quantity', message: 'Quantity is missing or not a number' });
     else if (q.lt(0)) out.push({ level: 'error', field: 'quantity', message: 'Quantity is negative' });
     if (rt === null) out.push({ level: 'error', field: 'rate', message: 'Rate is missing or not a number' });
@@ -80,7 +83,7 @@ export const computedAmount = (r: ImportRow): string | null => {
 
 /** Shape sent to PUT /imports/:id/rows: numbers normalised, issues left to the server. */
 export const toPayload = (rows: ImportRow[]) => rows.map((r) => ({
-  rowNo: r.rowNo, kind: r.kind, itemNo: r.itemNo.trim(), description: r.description, unitRaw: r.unitRaw, unit: r.unit,
+  rowNo: r.rowNo, kind: r.kind, itemNo: r.itemNo.trim(), description: r.description, unitRaw: r.unitRaw, unit: r.unit, unitInferred: r.unitInferred ?? null,
   quantity: num(r.quantity)?.toString() ?? null, rate: num(r.rate)?.toString() ?? null, amount: num(r.amount)?.toString() ?? null,
   specRef: r.specRef ?? null, drawingRef: r.drawingRef ?? null,
 }));
