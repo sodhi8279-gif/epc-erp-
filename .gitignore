@@ -5,3 +5,4 @@ storage/
 coverage
 *.log
 release/
+apps/api/storage-test/
