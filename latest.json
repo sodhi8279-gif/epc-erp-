@@ -1,7 +1,7 @@
 {
-  "version": "0.3.0",
-  "url": "https://github.com/sodhi8279-gif/epc-erp-/raw/downloads/EPC-Contracts-Setup-0.3.0.exe",
-  "sha256": "7fe774356a60d43d04fd353d5747ec277641fabe52931b39ecc24b276c8c389b",
-  "size": 102347365,
-  "notes": "Updates now install from inside the app (Help → Check for updates)."
+  "version": "0.4.0",
+  "url": "https://github.com/sodhi8279-gif/epc-erp-/raw/downloads/EPC-Contracts-Setup-0.4.0.exe",
+  "sha256": "bb10e2f64c85abcf0592ba8fbe87dc74c63dbbe2a136717fef78a514157c0c86",
+  "size": 103006350,
+  "notes": "New project: fill details from the uploaded agreement; build the BOQ from an uploaded BOQ or RA bill (Excel or PDF)."
 }
