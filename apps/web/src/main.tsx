@@ -10,6 +10,7 @@ import { Layout } from './components/Layout';
 import { Login } from './pages/Login';
 import { Portfolio } from './pages/Portfolio';
 import { Projects } from './pages/Projects';
+import { NewProject } from './pages/NewProject';
 import { ProjectOverview } from './pages/ProjectOverview';
 import { Contracts } from './pages/boq/Contracts';
 import { ContractDetail } from './pages/boq/ContractDetail';
@@ -56,6 +57,7 @@ createRoot(document.getElementById('root')!).render(
             <Route element={<Protected />}>
               <Route path="/" element={<Portfolio />} />
               <Route path="/projects" element={<Projects />} />
+              <Route path="/projects/new" element={<NewProject />} />
               <Route path="/subcontractors" element={<Subcontractors />} />
               <Route path="/subcontractors/:id" element={<SubcontractorDetail />} />
               <Route path="/materials" element={<MaterialMaster />} />

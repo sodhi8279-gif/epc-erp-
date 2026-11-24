@@ -9,7 +9,7 @@ import { idParam, zDate, zDec, zDecPos, zId } from '../lib/zod';
 import { putObject, getObject } from '../lib/storage';
 import { storeUpload } from './documents';
 import { addItem, assertDraft, compareRevision, createRevision, validateRevision } from '../services/boq';
-import { extractRows, FIELDS, importSummary, previewWorkbook, readWorkbook, sheetMatrix, validateRows, type ImportRow } from '../services/boqImport';
+import { extractRows, FIELDS, importSummary, isPdf, previewWorkbook, readSheets, validateRows, type ImportRow } from '../services/boqImport';
 
 async function contractScope(contractId: string) {
   const c = await prisma.contract.findUnique({ where: { id: contractId }, include: { project: true } });
@@ -215,14 +215,14 @@ const routes: FastifyPluginAsyncZod = async (app) => {
     const m = req.body.mapping;
     if (!m.description || !m.quantity || !m.rate || !m.itemNo) throw bad('Item number, description, quantity and rate columns must be mapped');
     const doc = await prisma.document.findUniqueOrThrow({ where: { id: imp.documentId } });
-    const wb = await readWorkbook(await getObject(doc.storagePath), doc.originalName);
-    const ws = wb.getWorksheet(req.body.sheetName);
+    const sheets = await readSheets(await getObject(doc.storagePath), doc.originalName);
+    const ws = sheets.find((s) => s.name === req.body.sheetName);
     if (!ws) throw bad('Sheet not found');
-    const rows = extractRows(sheetMatrix(ws), req.body.headerRow, m);
+    const rows = extractRows(ws.matrix, req.body.headerRow, m, { joinWrapped: isPdf(doc.originalName) });
     await prisma.boqImport.update({ where: { id: imp.id }, data: { status: 'MAPPED', sheetName: req.body.sheetName, headerRow: req.body.headerRow, mapping: m, rows: rows as never } });
     return { rows, summary: importSummary(rows) };
   });
-  const rowSchema = z.object({ rowNo: z.number(), kind: z.enum(['ITEM', 'HEADER', 'SKIP']), itemNo: z.string(), description: z.string(), unitRaw: z.string(), unit: z.string().nullable(), quantity: z.string().nullable(), rate: z.string().nullable(), amount: z.string().nullable(), specRef: z.string().nullable().optional(), drawingRef: z.string().nullable().optional(), issues: z.array(z.any()).optional() });
+  const rowSchema = z.object({ rowNo: z.number(), kind: z.enum(['ITEM', 'HEADER', 'SKIP']), itemNo: z.string(), description: z.string(), unitRaw: z.string(), unit: z.string().nullable(), unitInferred: z.string().nullable().optional(), quantity: z.string().nullable(), rate: z.string().nullable(), amount: z.string().nullable(), specRef: z.string().nullable().optional(), drawingRef: z.string().nullable().optional(), issues: z.array(z.any()).optional() });
   app.put('/imports/:id/rows', { schema: { tags: ['boq-import'], params: idParam, body: z.object({ rows: z.array(rowSchema) }) } }, async (req) => {
     const imp = await prisma.boqImport.findUnique({ where: { id: req.params.id } });
     if (!imp || imp.status !== 'MAPPED') throw conflict('Import must be mapped before corrections');
@@ -241,9 +241,10 @@ const routes: FastifyPluginAsyncZod = async (app) => {
     const s = importSummary(rows);
     if (s.errors > 0) throw bad(`${s.errors} error(s) must be corrected before the BOQ can be created`);
     if (s.warnings > 0 && !req.body.acknowledgeWarnings) throw conflict(`${s.warnings} warning(s) must be acknowledged`);
+    const doc = await prisma.document.findUniqueOrThrow({ where: { id: imp.documentId } });
     return prisma.$transaction(async (tx) => {
       const approved = await tx.boqRevision.findFirst({ where: { contractId: imp.contractId, status: 'APPROVED' } });
-      const rev = await createRevision(tx, imp.contractId, req.user.id, { type: approved ? 'REVISED' : 'ORIGINAL', title: req.body.title, sourceDocumentId: imp.documentId, remarks: `Imported from ${imp.sheetName}` });
+      const rev = await createRevision(tx, imp.contractId, req.user.id, { type: approved ? 'REVISED' : 'ORIGINAL', title: req.body.title, sourceDocumentId: imp.documentId, remarks: `Imported from ${doc.originalName}${imp.sheetName && !isPdf(doc.originalName) ? ` (sheet ${imp.sheetName})` : ''}` });
       // For a revised BOQ: match imported rows to existing items by item number so item identity (and history) is kept.
       const existing = approved ? await tx.boqItem.findMany({ where: { revisionId: rev.id } }) : [];
       const byNo = new Map(existing.map((e) => [e.itemNo.toUpperCase(), e]));

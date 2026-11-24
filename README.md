@@ -10,7 +10,8 @@ One integrated record for client contract BOQ, subcontractor work, measurements,
 |---|---|
 | Organisation & access | Companies, projects, users; 14 configurable roles; permissions scoped to company or project with financial limits; segregation of duties; append-only audit log with before/after diff |
 | Contracts & BOQ | Contracts, BOQ sections/items, original / revised / variation revisions with item identity kept across revisions, extra / substituted / deviated items, item-by-item comparison, submit → approve workflow. Approved revisions are locked by the database itself |
-| BOQ import wizard | Upload .xlsx/.csv → header and column detection (multi-row headers) → mapping → review grid with per-row errors/warnings (missing/unknown units, non-numeric values, qty × rate ≠ amount, duplicate item numbers) → bulk corrections → confirm into a **draft** revision that still needs approval. Original file kept with SHA-256. Tested on RA Bill 32 (676 rows) |
+| New project wizard | Fill the project and its agreement from the uploaded agreement (PDF / Word: name of work, client, agreement no. and date, contract value, LOA, start and completion dates, state, contract type, each shown with the text it came from) or by hand; then upload the BOQ or an RA bill (Excel or PDF) straight into the import wizard |
+| BOQ import wizard | Upload .xlsx/.csv/.pdf (PDF tables rebuilt from text positions; wrapped lines joined) → header and column detection (multi-row headers) → mapping → review grid with per-row errors/warnings (missing/unknown units, non-numeric values, qty × rate ≠ amount, duplicate item numbers) → bulk corrections → confirm into a **draft** revision that still needs approval. Original file kept with SHA-256. Tested on RA Bill 32 (676 rows) |
 | Activity breakup | Split a BOQ item into activities by % or fixed ₹/unit (or mixed), each with its own unit and an approved conversion basis; must reconcile to the client rate; rate layers screen: client rate → internal budget → subcontract rates → margin |
 | Subcontractors & work orders | Master with GSTIN/PAN/IFSC validation, compliance documents with expiry and verification, onboarding → active; bank-detail changes need authority + reason. Work orders against approved activities, approval within financial limit, amendments with prospective rate history |
 | Work allocation | Allocation matrix keeping contract → revised → allocated → executed → measured → approved → certified separate; detects scope overrun, WO limit, chainage/zone overlap, wrong BOQ linkage, unapproved rate; exceptions need a reason and a second approver; daily site progress |
@@ -71,6 +72,6 @@ docs           ARCHITECTURE.md (decisions, safeguards), openapi.json
 ## Not yet done (known gaps)
 
 - **Billing & payments** (subcontractor RA bills, retention, security deposit, advance recovery, material recovery into bills, GST/TDS, payment recording, client RA bills), **reports & exports** (PDF/Excel), **subcontractor portal**: waiting for the rest of the specification. Billed/paid columns in the allocation matrix show "—" until then.
-- PDF BOQ extraction: PDFs are stored; tables must be converted to Excel for import. Legacy .xls must be saved as .xlsx.
+- PDFs must have a text layer: scanned agreements and bills cannot be read (no OCR); fill those in by hand. Legacy .xls must be saved as .xlsx.
 - No login rate limiting or password reset email yet; set `CORS_ORIGIN` in production.
 - Stores can be created but not edited; GRNs cannot be reversed (use an adjustment workflow, to be added).

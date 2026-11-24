@@ -6,7 +6,10 @@ import { prisma } from '../lib/db';
 import { requirePermission, visibleProjectIds, projectScope } from '../lib/auth';
 import { audit } from '../lib/audit';
 import { bad, forbidden, notFound } from '../lib/errors';
-import { zDate, zDecOpt, zId, idParam } from '../lib/zod';
+import { zDate, zDec, zDecOpt, zDecPos, zId, idParam } from '../lib/zod';
+import { putObject } from '../lib/storage';
+import { storeUpload } from './documents';
+import { documentText, extractAgreementFields } from '../services/agreement';
 
 const projectTypes = ['WTP', 'STP', 'WATER_SUPPLY', 'PIPELINE', 'PUMPING_STATION', 'SEWERAGE', 'CIVIL', 'RCC_BUILDING', 'MECH_ELEC', 'INDUSTRIAL_EPC', 'HYDRO_MECHANICAL', 'OTHER'] as const;
 
@@ -53,14 +56,52 @@ const routes: FastifyPluginAsyncZod = async (app) => {
     location: z.string().optional(), state: z.string().optional(), startDate: zDate.optional(), endDate: zDate.optional(),
     status: z.enum(['PLANNING', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CLOSED']).optional(),
   });
-  app.post('/projects', { schema: { tags: ['org'], body: projectBody } }, async (req) => {
-    await requirePermission(req.user, 'org.manage', { companyId: req.body.companyId });
+  // Agreement details entered with a new project. They become the project's first contract, so a BOQ can be imported against it.
+  const agreementBody = z.object({
+    contractNo: z.string().min(1), title: z.string().min(3).optional(), client: z.string().min(2).optional(),
+    type: z.enum(['ITEM_RATE', 'PERCENTAGE_RATE', 'LUMP_SUM', 'EPC', 'DESIGN_BUILD']).default('ITEM_RATE'),
+    contractValue: zDecPos.default('0'), agreementDate: zDate.optional(), loaRef: z.string().optional(), startDate: zDate.optional(), completionDate: zDate.optional(), rebatePercent: zDec.optional(),
+  });
+  app.post('/projects', { schema: { tags: ['org'], body: projectBody.extend({ contract: agreementBody.optional(), agreementDocumentId: zId.optional() }) } }, async (req) => {
+    const { contract, agreementDocumentId, ...body } = req.body;
+    await requirePermission(req.user, 'org.manage', { companyId: body.companyId });
+    if (contract && !(contract.client ?? body.client)) throw bad('Client is required for the agreement');
+    if (agreementDocumentId) {
+      const d = await prisma.document.findUnique({ where: { id: agreementDocumentId } });
+      if (!d || d.companyId !== body.companyId || d.projectId || d.category !== 'AGREEMENT') throw bad('Agreement document not found');
+    }
     return prisma.$transaction(async (tx) => {
-      const p = await tx.project.create({ data: { ...req.body, createdById: req.user.id } });
+      const p = await tx.project.create({ data: { ...body, createdById: req.user.id } });
       await tx.store.create({ data: { projectId: p.id, code: 'MAIN', name: 'Main Site Store' } });
       await audit(tx, req.user, { entityType: 'Project', entityId: p.id, action: 'CREATE', after: p, projectId: p.id, companyId: p.companyId });
-      return p;
+      let c = null;
+      if (contract) {
+        c = await tx.contract.create({ data: { ...contract, title: contract.title ?? body.name, client: (contract.client ?? body.client)!, startDate: contract.startDate ?? body.startDate, completionDate: contract.completionDate ?? body.endDate, projectId: p.id } });
+        await audit(tx, req.user, { entityType: 'Contract', entityId: c.id, action: 'CREATE', after: c, projectId: p.id, companyId: p.companyId });
+      }
+      if (agreementDocumentId) {
+        await tx.document.update({ where: { id: agreementDocumentId }, data: { projectId: p.id, entityType: c ? 'Contract' : 'Project', entityId: c?.id ?? p.id } });
+      }
+      return { ...p, contract: c };
     });
+  });
+  /** Read an agreement (PDF / Word) and suggest project and contract details. The file is kept and attached when the project is created. */
+  app.post('/agreements/extract', { schema: { tags: ['org'], consumes: ['multipart/form-data'] } }, async (req) => {
+    const { file, buf, fields } = await storeUpload(req);
+    const companyId = fields.companyId;
+    if (!companyId) throw bad('companyId is required');
+    await requirePermission(req.user, 'org.manage', { companyId });
+    let text = '', readError: string | null = null;
+    try { text = await documentText(buf, file.filename); } catch (e) { readError = (e as Error).message; }
+    const suggestions = text ? extractAgreementFields(text) : {};
+    if (!readError && text.replace(/\s/g, '').length < 50) readError = 'No text could be read from this file (it is probably a scanned copy). Fill in the details by hand; the file is still attached to the project.';
+    const obj = await putObject(buf);
+    const doc = await prisma.$transaction(async (tx) => {
+      const d = await tx.document.create({ data: { companyId, category: 'AGREEMENT', originalName: file.filename, mimeType: file.mimetype, size: buf.length, ...obj, uploadedById: req.user.id } });
+      await audit(tx, req.user, { entityType: 'Document', entityId: d.id, action: 'UPLOAD', after: { name: d.originalName, sha256: d.sha256, category: d.category }, companyId });
+      return d;
+    });
+    return { document: { id: doc.id, originalName: doc.originalName }, suggestions, readError, characters: text.length };
   });
   app.patch('/projects/:id', { schema: { tags: ['org'], params: idParam, body: projectBody.omit({ companyId: true }).partial() } }, async (req) => {
     const before = await prisma.project.findUnique({ where: { id: req.params.id } });
